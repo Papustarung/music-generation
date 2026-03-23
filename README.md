@@ -16,7 +16,7 @@ A Django-based domain layer implementation for a music generation platform. This
 ### 1. Clone the repository
 
 ```bash
-git clone <your-repository-url>
+git clone https://github.com/Papustarung/music-generation.git
 cd music_generation
 ```
 
