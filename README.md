@@ -39,7 +39,7 @@ source venv/bin/activate
 ### 3. Install dependencies
 
 ```bash
-pip install django
+pip install -r requirements.txt
 ```
 
 ### 4. Apply database migrations
@@ -81,6 +81,7 @@ CRUD functionality is provided through the **Django Admin interface**.
 | **Song** | Songs stored in a Library, with genre, vocal style, occasion, and visibility |
 | **Generation Job** | Music generation requests submitted by a Creator |
 
+[CRUD operations demo](https://youtu.be/h37pt2xlssQ)
 ---
 
 ## Domain Model
