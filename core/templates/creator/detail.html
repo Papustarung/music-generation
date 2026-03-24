@@ -1,0 +1,16 @@
+{% extends "core/base.html" %}
+{% block title %}{{ creator.display_name }}{% endblock %}
+{% block content %}
+<h1>Creator: {{ creator.display_name }}</h1>
+<ul>
+  <li>ID: {{ creator.pk }}</li>
+  <li>Email: {{ creator.email }}</li>
+  <li>Display Name: {{ creator.display_name }}</li>
+  <li>Token Amount: {{ creator.token_amount }}</li>
+</ul>
+<p>
+  <a href="{% url 'creator_update' creator.pk %}">Edit</a> |
+  <a href="{% url 'creator_delete' creator.pk %}">Delete</a> |
+  <a href="{% url 'creator_list' %}">Back to list</a>
+</p>
+{% endblock %}

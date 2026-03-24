@@ -1,0 +1,16 @@
+{% extends "core/base.html" %}
+{% block title %}Generation Jobs{% endblock %}
+{% block content %}
+<h1>Generation Jobs</h1>
+<a href="{% url 'generation_job_create' %}">+ New Job</a>
+<ul>
+  {% for job in jobs %}
+    <li>
+      <a href="{% url 'generation_job_detail' job.pk %}">Job #{{ job.pk }}: {{ job.title }}</a>
+      — {{ job.get_status_display }} | {{ job.creator }}
+    </li>
+  {% empty %}
+    <li>No jobs yet.</li>
+  {% endfor %}
+</ul>
+{% endblock %}

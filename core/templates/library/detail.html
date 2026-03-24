@@ -1,0 +1,22 @@
+{% extends "core/base.html" %}
+{% block title %}{{ library }}{% endblock %}
+{% block content %}
+<h1>{{ library }}</h1>
+<ul>
+  <li>ID: {{ library.pk }}</li>
+  <li>Creator: <a href="{% url 'creator_detail' library.creator.pk %}">{{ library.creator }}</a></li>
+</ul>
+<h2>Songs in this Library</h2>
+<ul>
+  {% for song in library.song_set.all %}
+    <li><a href="{% url 'song_detail' song.pk %}">{{ song.title }}</a></li>
+  {% empty %}
+    <li>No songs yet.</li>
+  {% endfor %}
+</ul>
+<p>
+  <a href="{% url 'library_update' library.pk %}">Edit</a> |
+  <a href="{% url 'library_delete' library.pk %}">Delete</a> |
+  <a href="{% url 'library_list' %}">Back to list</a>
+</p>
+{% endblock %}

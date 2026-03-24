@@ -1,0 +1,16 @@
+{% extends "core/base.html" %}
+{% block title %}Songs{% endblock %}
+{% block content %}
+<h1>Songs</h1>
+<a href="{% url 'song_create' %}">+ New Song</a>
+<ul>
+  {% for song in songs %}
+    <li>
+      <a href="{% url 'song_detail' song.pk %}">{{ song.title }}</a>
+      — {{ song.genre }} | {{ song.vocal_style }} | {{ song.occasion }}
+    </li>
+  {% empty %}
+    <li>No songs yet.</li>
+  {% endfor %}
+</ul>
+{% endblock %}

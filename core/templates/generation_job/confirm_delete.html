@@ -1,0 +1,11 @@
+{% extends "core/base.html" %}
+{% block title %}Delete Generation Job{% endblock %}
+{% block content %}
+<h1>Delete Generation Job</h1>
+<p>Are you sure you want to delete <strong>{{ object }}</strong>?</p>
+<form method="post">
+  {% csrf_token %}
+  <button type="submit">Yes, Delete</button>
+  <a href="{% url 'generation_job_list' %}">Cancel</a>
+</form>
+{% endblock %}

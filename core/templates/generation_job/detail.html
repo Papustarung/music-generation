@@ -1,0 +1,29 @@
+{% extends "core/base.html" %}
+{% block title %}Job #{{ job.pk }}{% endblock %}
+{% block content %}
+<h1>Generation Job #{{ job.pk }}: {{ job.title }}</h1>
+<ul>
+  <li>ID: {{ job.pk }}</li>
+  <li>Creator: <a href="{% url 'creator_detail' job.creator.pk %}">{{ job.creator }}</a></li>
+  <li>Song:
+    {% if job.song %}
+      <a href="{% url 'song_detail' job.song.pk %}">{{ job.song }}</a>
+    {% else %}
+      —
+    {% endif %}
+  </li>
+  <li>Status: {{ job.get_status_display }}</li>
+  <li>Requested At: {{ job.requested_at }}</li>
+  <li>Title: {{ job.title }}</li>
+  <li>Story: {{ job.story }}</li>
+  <li>Genre: {{ job.get_genre_display }}</li>
+  <li>Vocal Style: {{ job.get_vocal_style_display }}</li>
+  <li>Occasion: {{ job.get_occasion_display }}</li>
+  <li>Lyrics: {{ job.lyrics|default:"—" }}</li>
+</ul>
+<p>
+  <a href="{% url 'generation_job_update' job.pk %}">Edit</a> |
+  <a href="{% url 'generation_job_delete' job.pk %}">Delete</a> |
+  <a href="{% url 'generation_job_list' %}">Back to list</a>
+</p>
+{% endblock %}

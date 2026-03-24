@@ -1,0 +1,21 @@
+{% extends "core/base.html" %}
+{% block title %}{{ song.title }}{% endblock %}
+{% block content %}
+<h1>{{ song.title }}</h1>
+<ul>
+  <li>ID: {{ song.pk }}</li>
+  <li>Library: <a href="{% url 'library_detail' song.library.pk %}">{{ song.library }}</a></li>
+  <li>Story: {{ song.story }}</li>
+  <li>Genre: {{ song.get_genre_display }}</li>
+  <li>Vocal Style: {{ song.get_vocal_style_display }}</li>
+  <li>Occasion: {{ song.get_occasion_display }}</li>
+  <li>Visibility: {{ song.get_visibility_display }}</li>
+  <li>Lyrics: {{ song.lyrics|default:"—" }}</li>
+  <li>Audio Location: {{ song.audio_location|default:"—" }}</li>
+</ul>
+<p>
+  <a href="{% url 'song_update' song.pk %}">Edit</a> |
+  <a href="{% url 'song_delete' song.pk %}">Delete</a> |
+  <a href="{% url 'song_list' %}">Back to list</a>
+</p>
+{% endblock %}

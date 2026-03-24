@@ -1,0 +1,13 @@
+{% extends "core/base.html" %}
+{% block title %}Libraries{% endblock %}
+{% block content %}
+<h1>Libraries</h1>
+<a href="{% url 'library_create' %}">+ New Library</a>
+<ul>
+  {% for library in libraries %}
+    <li><a href="{% url 'library_detail' library.pk %}">{{ library }}</a></li>
+  {% empty %}
+    <li>No libraries yet.</li>
+  {% endfor %}
+</ul>
+{% endblock %}

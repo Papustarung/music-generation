@@ -1,0 +1,13 @@
+{% extends "core/base.html" %}
+{% block title %}Creators{% endblock %}
+{% block content %}
+<h1>Creators</h1>
+<a href="{% url 'creator_create' %}">+ New Creator</a>
+<ul>
+  {% for creator in creators %}
+    <li><a href="{% url 'creator_detail' creator.pk %}">{{ creator.display_name }}</a> ({{ creator.email }})</li>
+  {% empty %}
+    <li>No creators yet.</li>
+  {% endfor %}
+</ul>
+{% endblock %}
