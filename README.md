@@ -68,7 +68,28 @@ The application will be available at `http://127.0.0.1:8000/`.
 
 ## CRUD Operations
 
-CRUD functionality is provided through the **Django Admin interface**.
+### HTML Interface (Function-Based Views)
+
+Full CRUD is available via plain HTML pages at the following URLs. No login required in development.
+
+| Entity | List | Create | Detail | Edit | Delete |
+|---|---|---|---|---|---|
+| **Creator** | `/creators/` | `/creators/create/` | `/creators/<id>/` | `/creators/<id>/edit/` | `/creators/<id>/delete/` |
+| **Library** | `/libraries/` | `/libraries/create/` | `/libraries/<id>/` | `/libraries/<id>/edit/` | `/libraries/<id>/delete/` |
+| **Song** | `/songs/` | `/songs/create/` | `/songs/<id>/` | `/songs/<id>/edit/` | `/songs/<id>/delete/` |
+| **Generation Job** | `/jobs/` | `/jobs/create/` | `/jobs/<id>/` | `/jobs/<id>/edit/` | `/jobs/<id>/delete/` |
+
+Visiting `http://127.0.0.1:8000/` redirects to `/creators/`. A navigation bar links to all four entity lists.
+
+**Recommended creation order** (to satisfy foreign-key constraints):
+1. Create a **Creator**
+2. Create a **Library** — select the Creator created above
+3. Create a **Song** — select the Library created above
+4. Create a **Generation Job** — select a Creator (and optionally a Song)
+
+[CRUD functionality demo (API)](https://youtu.be/H5vxge5HoOg)
+
+### Django Admin Interface
 
 1. Start the server and navigate to `http://127.0.0.1:8000/admin/`
 2. Log in with the superuser credentials created above
@@ -81,7 +102,8 @@ CRUD functionality is provided through the **Django Admin interface**.
 | **Song** | Songs stored in a Library, with genre, vocal style, occasion, and visibility |
 | **Generation Job** | Music generation requests submitted by a Creator |
 
-[CRUD operations demo](https://youtu.be/h37pt2xlssQ)
+[CRUD functionality demo (Admin)](https://youtu.be/h37pt2xlssQ)
+
 ---
 
 ## Domain Model
@@ -116,6 +138,7 @@ music_generation/
 │   └── urls.py
 └── core/                   # Main application
     ├── admin.py
+    ├── forms.py            # ModelForms for each entity
     ├── urls.py
     ├── models/
     │   ├── entities/       # Domain entities
@@ -134,6 +157,17 @@ music_generation/
     │   ├── library_views.py
     │   ├── song_views.py
     │   └── generation_job_views.py
+    ├── templates/
+    │   ├── core/
+    │   │   └── base.html           # Shared base with navigation
+    │   ├── creator/
+    │   │   ├── list.html
+    │   │   ├── detail.html
+    │   │   ├── form.html           # Shared create/update form
+    │   │   └── confirm_delete.html
+    │   ├── library/                # Same 4 templates
+    │   ├── song/                   # Same 4 templates
+    │   └── generation_job/         # Same 4 templates
     └── migrations/
         └── 0001_initial.py
 ```
