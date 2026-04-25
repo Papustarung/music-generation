@@ -36,7 +36,10 @@
   {# ── Audio player ── #}
   {% if song.audio_location %}
   <div class="card" style="margin-bottom:1.5rem;">
-    <p style="color:#a78bfa;font-weight:600;margin:0 0 1rem;font-size:1rem;">&#9834; Listen</p>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;">
+      <p style="color:#a78bfa;font-weight:600;margin:0;font-size:1rem;">&#9834; Listen</p>
+      <a href="{% url 'song_download' song.pk %}" class="btn btn-secondary btn-sm">&#8681; Download MP3</a>
+    </div>
     <audio controls style="width:100%;height:48px;">
       <source src="{{ song.audio_location }}" type="audio/mpeg">
       Your browser does not support the audio element.

@@ -238,6 +238,7 @@
         {% endif %}
       </a>
       <span class="nav-username">{{ user.display_name|default:user.email }}</span>
+      <span style="font-size:.8rem;color:#a78bfa;background:#1e1a2e;border:1px solid #4c1d95;padding:.15rem .55rem;border-radius:999px;white-space:nowrap;"> {{ user.token_amount }} tokens</span>
       <a href="{% url 'logout' %}" class="btn-nav-logout">Sign out</a>
     </div>
   {% else %}
