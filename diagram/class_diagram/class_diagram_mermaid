@@ -1,0 +1,274 @@
+classDiagram
+    namespace TemplateLayer {
+        class auth_templates {
+            <<templates>>
+            login.html
+            register.html
+        }
+        class song_templates {
+            <<templates>>
+            list.html
+            detail.html
+            shared.html
+            shared_unavailable.html
+            form.html
+            confirm_delete.html
+        }
+        class generation_job_templates {
+            <<templates>>
+            list.html
+            detail.html
+            form.html
+            confirm_delete.html
+        }
+        class notification_templates {
+            <<templates>>
+            list.html
+        }
+        class library_templates {
+            <<templates>>
+            list.html
+            detail.html
+            form.html
+            confirm_delete.html
+        }
+        class creator_templates {
+            <<templates>>
+            list.html
+            detail.html
+            form.html
+            confirm_delete.html
+        }
+    }
+
+    namespace ViewLayer {
+        class auth_views {
+            <<view>>
+            login_view()
+            register_view()
+            logout_view()
+            google_redirect_view()
+            google_callback_view()
+        }
+        class song_views {
+            <<view>>
+            song_list()
+            song_detail()
+            song_update()
+            song_stream()
+            song_download()
+            song_delete()
+            shared_song()
+        }
+        class generation_job_views {
+            <<view>>
+            generation_job_list()
+            generation_job_detail()
+            generation_job_create()
+        }
+        class notification_views {
+            <<view>>
+            notification_list()
+        }
+        class library_views {
+            <<view>>
+            library_list()
+            library_detail()
+            library_create()
+            library_update()
+            library_delete()
+        }
+        class creator_views {
+            <<view>>
+            creator_list()
+            creator_detail()
+            creator_create()
+            creator_update()
+            creator_delete()
+        }
+        class webhook_views {
+            <<view>>
+            suno_webhook()
+        }
+        class LoginForm {
+            <<form>>
+            email: EmailField
+            password: CharField
+        }
+        class RegisterForm {
+            <<form>>
+            email: EmailField
+            display_name: CharField
+            password: CharField
+            password_confirm: CharField
+            clean()
+        }
+        class GenerateSongForm {
+            <<form>>
+            title: CharField
+            story: CharField
+            genre: ChoiceField
+            vocal_style: ChoiceField
+            occasion: ChoiceField
+            lyrics: CharField
+            content_rules_accepted: BooleanField
+            clean()
+        }
+        class SongForm {
+            <<form>>
+            visibility: ChoiceField
+        }
+    }
+
+    namespace ServiceLayer {
+        class AuthService {
+            <<service>>
+            strategy: AuthStrategy
+            authenticate(request, credentials) AuthResult
+            register(request, data) AuthResult
+        }
+        class AuthStrategy {
+            <<abstract>>
+            authenticate(**credentials) AuthResult
+            register(**data) AuthResult
+        }
+        class PasswordAuthStrategy {
+            authenticate(**credentials) AuthResult
+            register(**data) AuthResult
+        }
+        class GoogleAuthStrategy {
+            authenticate(**credentials) AuthResult
+            register(**data) AuthResult
+        }
+        class GenerationService {
+            <<service>>
+            strategy: SongGeneratorStrategy
+            run(job)
+            _set_status(job, status)
+            _poll_until_done(job, task_id) GenerationResult
+            _save_song(job, result)
+            _download_audio(url) str
+        }
+        class SongGeneratorStrategy {
+            <<abstract>>
+            generate(request) GenerationResult
+            poll(task_id) GenerationResult
+        }
+        class MockSongGeneratorStrategy {
+            generate(request) GenerationResult
+            poll(task_id) GenerationResult
+        }
+        class SunoSongGeneratorStrategy {
+            generate(request) GenerationResult
+            poll(task_id) GenerationResult
+        }
+    }
+
+    namespace ModelLayer {
+        class Creator {
+            <<entity>>
+            email: String
+            display_name: String
+            token_amount: Int
+            last_token_replenish: Date
+        }
+        class Library {
+            <<entity>>
+        }
+        class Song {
+            <<entity>>
+            title: String
+            story: String
+            genre: Genre
+            vocal_style: VocalStyle
+            occasion: Occasion
+            visibility: Visibility
+            lyrics: String
+            audio_location: String
+            created_at: DateTime
+            share_token: UUID
+        }
+        class GenerationJob {
+            <<entity>>
+            status: JobStatus
+            task_id: String
+            requested_at: DateTime
+            title: String
+            story: String
+            genre: Genre
+            vocal_style: VocalStyle
+            occasion: Occasion
+            lyrics: String
+        }
+        class Notification {
+            <<entity>>
+            message: String
+            level: Level
+            is_read: Boolean
+            created_at: DateTime
+        }
+        class OAuthProfile {
+            <<entity>>
+            provider: String
+            provider_user_id: String
+            access_token: String
+            refresh_token: String
+        }
+    }
+
+    %% ── Template → View ────────────────────────────────────────────────
+    auth_templates ..> auth_views : rendered by
+    song_templates ..> song_views : rendered by
+    generation_job_templates ..> generation_job_views : rendered by
+    notification_templates ..> notification_views : rendered by
+    library_templates ..> library_views : rendered by
+    creator_templates ..> creator_views : rendered by
+
+    %% ── View → Form ────────────────────────────────────────────────────
+    auth_views ..> LoginForm : uses
+    auth_views ..> RegisterForm : uses
+    generation_job_views ..> GenerateSongForm : uses
+    song_views ..> SongForm : uses
+
+    %% ── View → Service ─────────────────────────────────────────────────
+    auth_views --> AuthService : delegates to
+    generation_job_views --> GenerationService : delegates to
+    webhook_views --> GenerationService : delegates to
+
+    %% ── View → Model (direct ORM — no service) ─────────────────────────
+    song_views ..> Song : queries directly
+    library_views ..> Library : queries directly
+    creator_views ..> Creator : queries directly
+    notification_views ..> Notification : queries directly
+    generation_job_views ..> GenerationJob : queries directly
+
+    %% ── Form → Model ───────────────────────────────────────────────────
+    SongForm ..> Song : ModelForm binding
+
+    %% ── Service → Strategy ─────────────────────────────────────────────
+    AuthService --> AuthStrategy : uses
+    AuthStrategy <|-- PasswordAuthStrategy : extends
+    AuthStrategy <|-- GoogleAuthStrategy : extends
+    GenerationService --> SongGeneratorStrategy : uses
+    SongGeneratorStrategy <|-- MockSongGeneratorStrategy : extends
+    SongGeneratorStrategy <|-- SunoSongGeneratorStrategy : extends
+
+    %% ── Strategy → Model ───────────────────────────────────────────────
+    PasswordAuthStrategy ..> Creator : creates / queries
+    GoogleAuthStrategy ..> Creator : creates / queries
+    GoogleAuthStrategy ..> OAuthProfile : creates / queries
+
+    %% ── Service → Model ────────────────────────────────────────────────
+    GenerationService ..> Song : creates
+    GenerationService ..> Library : reads
+    GenerationService ..> GenerationJob : updates
+    GenerationService ..> Notification : creates
+
+    %% ── Model relationships ─────────────────────────────────────────────
+    Creator "1" --> "1" Library : has
+    Creator "1" --> "0..*" Song : owns
+    Creator "1" --> "0..*" GenerationJob : initiates
+    Creator "1" --> "0..*" Notification : receives
+    Creator "1" --> "0..*" OAuthProfile : authenticates via
+    Library "1" --> "0..*" Song : contains
+    GenerationJob "1" --> "0..1" Song : results in

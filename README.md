@@ -208,14 +208,20 @@ INFO Suno webhook: job 5 completed successfully
 
 ## Domain Model
 
+![Domain Model](diagram/domain_model/domain_model.png)
+
 The domain layer consists of the following entities and enumerations:
 
 ### Entities
 
-- **Creator** — `email`, `displayName`, `tokenAmount`
-- **Library** — belongs to one Creator (one-to-one)
-- **Song** — `title`, `story`, `genre`, `vocalStyle`, `occasion`, `lyrics` (optional), `visibility`, `audioLocation`; belongs to a Library
-- **GenerationJob** — `status`, `requestedAt`, `title`, `story`, `genre`, `vocalStyle`, `occasion`, `lyrics` (optional); linked to a Creator and optionally to a Song
+| Entity | Key Attributes | Relationships |
+|---|---|---|
+| **Creator** | `email`, `displayName`, `tokenAmount`, `lastTokenReplenish` | Has 1 Library; owns 0..* Songs; initiates 0..* GenerationJobs; receives 0..* Notifications; has 0..* OAuthProfiles |
+| **Library** | — | Belongs to 1 Creator; contains 0..* Songs |
+| **Song** | `title`, `story`, `genre`, `vocalStyle`, `occasion`, `lyrics`?, `visibility`, `audioLocation`, `sharedToken`, `createdAt` | Belongs to a Library; optionally produced by 1 GenerationJob |
+| **GenerationJob** | `status`, `requestedAt`, `taskId`, `title`, `story`, `genre`, `vocalStyle`, `occasion`, `lyrics`? | Linked to 1 Creator; results in 0..1 Song |
+| **Notification** | `message`, `level`, `isRead`, `createdAt` | Received by 1 Creator |
+| **OAuthProfile** | `provider`, `providerUserId`, `accessToken`, `refreshToken` | Belongs to 1 Creator |
 
 ### Enumerations
 
@@ -223,7 +229,7 @@ The domain layer consists of the following entities and enumerations:
 - **VocalStyle**: MALE, FEMALE, DUET, INSTRUMENTAL, RAP, OTHER
 - **Occasion**: BIRTHDAY, WEDDING, STUDY, WORKOUT, PARTY, RELAX, OTHER
 - **Visibility**: PRIVATE, SHARED
-- **JobStatus**: QUEUED, GENERATING, COMPLETED, FAILED
+- **JobStatus**: QUEUED, GENERATING, SAVING, COMPLETED, FAILED
 
 ---
 
@@ -233,41 +239,98 @@ The domain layer consists of the following entities and enumerations:
 music_generation/
 ├── manage.py
 ├── db.sqlite3
-├── music_generation/       # Project settings
+├── requirements.txt
+├── diagram/
+│   ├── domain_model/           # Domain model diagram (PNG, PDF, Lucidchart JSON)
+│   └── class_diagram/          # Architecture class diagram (PNG, PDF, Mermaid source)
+├── media/
+│   └── songs/                  # Generated audio files (served at /media/)
+├── music_generation/           # Django project settings
 │   ├── settings.py
-│   └── urls.py
-└── core/                   # Main application
+│   ├── urls.py
+│   ├── asgi.py
+│   └── wsgi.py
+└── core/                       # Main application
     ├── admin.py
-    ├── forms.py            # ModelForms for each entity
+    ├── forms.py                # ModelForms for Song, GenerationJob, Creator
     ├── urls.py
+    ├── context_processors.py   # Injects unread notification count into all templates
+    ├── notifications.py        # Helper to create Notification records
+    ├── tokens.py               # Token balance logic (replenish, deduct, check)
+    ├── auth/                   # Authentication module (Strategy pattern)
+    │   ├── backends.py         # Custom Django auth backend (email login)
+    │   ├── factory.py          # AuthStrategyFactory
+    │   ├── service.py          # AuthService — login/register orchestration
+    │   └── strategies/
+    │       ├── base.py         # AuthStrategy ABC
+    │       ├── password_strategy.py
+    │       └── google_strategy.py
+    ├── generation/             # Music generation module (Strategy pattern)
+    │   ├── factory.py          # SongGeneratorFactory
+    │   ├── service.py          # GenerationService — full job lifecycle
+    │   └── strategies/
+    │       ├── base.py         # SongGeneratorStrategy ABC
+    │       ├── mock_strategy.py
+    │       └── suno_strategy.py
     ├── models/
-    │   ├── entities/       # Domain entities
+    │   ├── entities/
     │   │   ├── creator.py
     │   │   ├── library.py
     │   │   ├── song.py
-    │   │   └── generation_job.py
-    │   └── enum/           # Domain enumerations
+    │   │   ├── generation_job.py
+    │   │   ├── notification.py
+    │   │   └── oauth_profile.py
+    │   └── enum/
     │       ├── genre.py
     │       ├── vocal_style.py
     │       ├── occasion.py
     │       ├── visibility.py
     │       └── job_status.py
     ├── views/
+    │   ├── auth_views.py           # Register, login, logout, Google OAuth
+    │   ├── home_view.py
     │   ├── creator_views.py
     │   ├── library_views.py
-    │   ├── song_views.py
-    │   └── generation_job_views.py
+    │   ├── song_views.py           # Song CRUD + stream + shared link
+    │   ├── generation_job_views.py # Job create/detail + background thread
+    │   ├── notification_views.py
+    │   └── webhook_views.py        # Suno callback endpoint
     ├── templates/
+    │   ├── home.html
+    │   ├── auth/
+    │   │   ├── login.html
+    │   │   └── register.html
     │   ├── core/
     │   │   └── base.html           # Shared base with navigation
-    │   ├── creator/
-    │   │   ├── list.html
-    │   │   ├── detail.html
-    │   │   ├── form.html           # Shared create/update form
-    │   │   └── confirm_delete.html
-    │   ├── library/                # Same 4 templates
-    │   ├── song/                   # Same 4 templates
-    │   └── generation_job/         # Same 4 templates
+    │   ├── creator/                # list, detail, form, confirm_delete
+    │   ├── library/
+    │   ├── song/                   # + shared.html, shared_unavailable.html
+    │   ├── generation_job/
+    │   └── notification/
     └── migrations/
-        └── 0001_initial.py
 ```
+
+---
+
+## Architecture — Class Diagram
+
+The application follows Django's **MVT (Model–View–Template)** architecture, with a Service layer sitting between Views and Models to keep business logic out of both.
+
+> **Note — diagram density:** The Mermaid source (`diagram/class_diagram/class_diagram_mermaid`) contains 20 classes across 4 namespaces connected by ~39 labelled arrows (Template→View, View→Form, View→Service, View→Model, Form→Model, Service→Strategy, Strategy→Model, Service→Model, and Model↔Model relationships). When rendered in an online editor this produces a dense "cobweb" layout that forces all text to a very small size. The exported PNG (`diagram/class_diagram/class_diagram.png`) and PDF are the recommended way to read the diagram at full resolution.
+
+![Architecture Class Diagram](diagram/class_diagram/class_diagram.png)
+
+### Layers
+
+| Layer | Components | Responsibility |
+|---|---|---|
+| **Template** | HTML templates (`base.html`, per-entity templates) | Rendered by Views; presents data to the user |
+| **View** | `*_views.py`, `forms.py` | Handles HTTP request/response; delegates business logic to Services |
+| **Service** | `AuthService`, `GenerationService`, Strategy classes | Orchestrates domain operations; applies Strategy pattern for auth and generation |
+| **Model** | `Creator`, `Library`, `Song`, `GenerationJob`, `Notification`, `OAuthProfile` | Persistent domain entities; mapped to the database via Django ORM |
+
+### Design Patterns
+
+- **Strategy** — `AuthService` / `GenerationService` each depend on an abstract strategy interface. Concrete strategies (`PasswordAuthStrategy`, `GoogleAuthStrategy`, `MockSongGeneratorStrategy`, `SunoSongGeneratorStrategy`) are selected at runtime via a Factory.
+- **Factory** — `AuthStrategyFactory` and `SongGeneratorFactory` read environment variables to instantiate the correct strategy.
+- **Observer (Signal)** — A Django `post_save` signal on `Creator` automatically creates the associated `Library`.

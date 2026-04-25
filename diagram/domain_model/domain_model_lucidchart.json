@@ -1,0 +1,573 @@
+{
+  "id": "bc070a37-a3d0-4609-b180-66118bf3cfc7",
+  "title": "domain_model",
+  "product": "lucidchart",
+  "pages": [
+    {
+      "id": "0_0",
+      "title": "Page 1",
+      "index": 0,
+      "items": {
+        "shapes": [
+          {
+            "id": "Gh_zP2fMuYmf",
+            "class": "UMLClassBlock",
+            "textAreas": [
+              {
+                "label": "Title",
+                "text": "<<enumeration>>\nVisibility"
+              },
+              {
+                "label": "Text2",
+                "text": "PRIVATE SHARED"
+              },
+              {
+                "label": "Text1",
+                "text": "+ attribute1:type = defaultValue\n+ attribute2:type\n- attribute3:type"
+              }
+            ],
+            "customData": [],
+            "linkedData": []
+          },
+          {
+            "id": "hhQzyD8bxuWm",
+            "class": "UMLClassBlock",
+            "textAreas": [
+              {
+                "label": "Title",
+                "text": "Song"
+              },
+              {
+                "label": "Text2",
+                "text": "title: String \nstory: String \ngenre: Genre\nvocalStyle: VocalStyle \noccasion: Occasion \nlyrics: String? \nvisibility: Visibility \naudioLocation: String\nsharedToken: UUID\ncreatedAt: DateTime"
+              },
+              {
+                "label": "Text1",
+                "text": "+ attribute1:type = defaultValue\n+ attribute2:type\n- attribute3:type"
+              }
+            ],
+            "customData": [],
+            "linkedData": []
+          },
+          {
+            "id": "vg_zic64deoB",
+            "class": "UMLClassBlock",
+            "textAreas": [
+              {
+                "label": "Title",
+                "text": "<<enumeration>>\nGenre"
+              },
+              {
+                "label": "Text2",
+                "text": "JAZZ ROCK POP HIPHOP CLASSICAL EDM RNB FOLK METAL OTHER"
+              },
+              {
+                "label": "Text1",
+                "text": "+ attribute1:type = defaultValue\n+ attribute2:type\n- attribute3:type"
+              }
+            ],
+            "customData": [],
+            "linkedData": []
+          },
+          {
+            "id": "Ug_zD~vUYuon",
+            "class": "UMLClassBlock",
+            "textAreas": [
+              {
+                "label": "Title",
+                "text": "<<enumeration>>\nOccasion"
+              },
+              {
+                "label": "Text2",
+                "text": "BIRTHDAY WEDDING STUDY WORKOUT PARTY RELAX OTHER"
+              },
+              {
+                "label": "Text1",
+                "text": "+ attribute1:type = defaultValue\n+ attribute2:type\n- attribute3:type"
+              }
+            ],
+            "customData": [],
+            "linkedData": []
+          },
+          {
+            "id": "zf_z-E0FbPeo",
+            "class": "UMLClassBlock",
+            "textAreas": [
+              {
+                "label": "Title",
+                "text": "<<enumeration>>\nJobStatus"
+              },
+              {
+                "label": "Text2",
+                "text": "QUEUED GENERATING\nSAVING COMPLETED FAILED"
+              },
+              {
+                "label": "Text1",
+                "text": "+ attribute1:type = defaultValue\n+ attribute2:type\n- attribute3:type"
+              }
+            ],
+            "customData": [],
+            "linkedData": []
+          },
+          {
+            "id": "_a7zCsZQGf8w",
+            "class": "MinimalTextBlock",
+            "textAreas": [
+              {
+                "label": "Text",
+                "text": "<<policy>> Content Rules enforced on inputs before job starts (FR-34, FR-35)"
+              }
+            ],
+            "customData": [],
+            "linkedData": []
+          },
+          {
+            "id": "ohQz~FQVroWX",
+            "class": "UMLClassBlock",
+            "textAreas": [
+              {
+                "label": "Title",
+                "text": "Library"
+              },
+              {
+                "label": "Text2",
+                "text": ""
+              },
+              {
+                "label": "Text1",
+                "text": "+ attribute1:type = defaultValue\n+ attribute2:type\n- attribute3:type"
+              }
+            ],
+            "customData": [],
+            "linkedData": []
+          },
+          {
+            "id": "dh_zUbS7WuNn",
+            "class": "UMLClassBlock",
+            "textAreas": [
+              {
+                "label": "Title",
+                "text": "<<enumeration>>\nVocalStyle"
+              },
+              {
+                "label": "Text2",
+                "text": "MALE FEMALE DUET INSTRUMENTAL RAP OTHER"
+              },
+              {
+                "label": "Text1",
+                "text": "+ attribute1:type = defaultValue\n+ attribute2:type\n- attribute3:type"
+              }
+            ],
+            "customData": [],
+            "linkedData": []
+          },
+          {
+            "id": "XgQz9Z1zWbry",
+            "class": "UMLClassBlock",
+            "textAreas": [
+              {
+                "label": "Title",
+                "text": "Creator"
+              },
+              {
+                "label": "Text2",
+                "text": "email: String displayName: String\ntokenAmount: Int\nlastTokenReplenish: DateTime"
+              },
+              {
+                "label": "Text1",
+                "text": "+ attribute1:type = defaultValue\n+ attribute2:type\n- attribute3:type"
+              }
+            ],
+            "customData": [],
+            "linkedData": []
+          },
+          {
+            "id": "JhQzJWGa6Bl9",
+            "class": "UMLClassBlock",
+            "textAreas": [
+              {
+                "label": "Title",
+                "text": "GenerationJob"
+              },
+              {
+                "label": "Text2",
+                "text": "status: JobStatus \nrequestedAt: DateTime \ntitle: String \nstory: String \ngenre: Genre\nvocalStyle: VocalStyle \noccasion: Occasion \nlyrics: String?"
+              },
+              {
+                "label": "Text1",
+                "text": "+ attribute1:type = defaultValue\n+ attribute2:type\n- attribute3:type"
+              }
+            ],
+            "customData": [],
+            "linkedData": []
+          },
+          {
+            "id": ".-zRgI-u5FJO",
+            "class": "UMLClassBlock",
+            "textAreas": [
+              {
+                "label": "Title",
+                "text": "OAuthProfile"
+              },
+              {
+                "label": "Text2",
+                "text": "provider: String\nproviderUserId: String\naccessToken: String\nrefreshToken: String"
+              },
+              {
+                "label": "Text1",
+                "text": "+ attribute1:type = defaultValue\n+ attribute2:type\n- attribute3:type"
+              }
+            ],
+            "customData": [],
+            "linkedData": []
+          },
+          {
+            "id": "g~zR7suzEVBf",
+            "class": "UMLClassBlock",
+            "textAreas": [
+              {
+                "label": "Title",
+                "text": "Notification"
+              },
+              {
+                "label": "Text2",
+                "text": "message: String\nlevel: String\nisRead: Boolean\ncreatedAt: DateTime"
+              },
+              {
+                "label": "Text1",
+                "text": "+ attribute1:type = defaultValue\n+ attribute2:type\n- attribute3:type"
+              }
+            ],
+            "customData": [],
+            "linkedData": []
+          }
+        ],
+        "lines": [
+          {
+            "id": "Uq_z4Aa9Fo-1",
+            "endpoint1": {
+              "style": "None",
+              "connectedTo": "JhQzJWGa6Bl9"
+            },
+            "endpoint2": {
+              "style": "Open Arrow",
+              "connectedTo": "zf_z-E0FbPeo"
+            },
+            "textAreas": [],
+            "customData": [],
+            "linkedData": []
+          },
+          {
+            "id": "ws_zM6-761VW",
+            "endpoint1": {
+              "style": "None",
+              "connectedTo": "hhQzyD8bxuWm"
+            },
+            "endpoint2": {
+              "style": "Open Arrow",
+              "connectedTo": "vg_zic64deoB"
+            },
+            "textAreas": [],
+            "customData": [],
+            "linkedData": []
+          },
+          {
+            "id": "zpQzPTSzp33.",
+            "endpoint1": {
+              "style": "Aggregation",
+              "connectedTo": "XgQz9Z1zWbry"
+            },
+            "endpoint2": {
+              "style": "None",
+              "connectedTo": "ohQz~FQVroWX"
+            },
+            "textAreas": [
+              {
+                "label": "m1",
+                "text": "1"
+              },
+              {
+                "label": "t0",
+                "text": "Has"
+              },
+              {
+                "label": "m2",
+                "text": "1"
+              }
+            ],
+            "customData": [],
+            "linkedData": []
+          },
+          {
+            "id": "~oQzf5cTFOQc",
+            "endpoint1": {
+              "style": "None",
+              "connectedTo": "XgQz9Z1zWbry"
+            },
+            "endpoint2": {
+              "style": "None",
+              "connectedTo": "hhQzyD8bxuWm"
+            },
+            "textAreas": [
+              {
+                "label": "m1",
+                "text": "1"
+              },
+              {
+                "label": "t0",
+                "text": "Owns/manages"
+              },
+              {
+                "label": "m2",
+                "text": "0..*"
+              }
+            ],
+            "customData": [],
+            "linkedData": []
+          },
+          {
+            "id": "Is_zlyQsPQKg",
+            "endpoint1": {
+              "style": "None",
+              "connectedTo": "hhQzyD8bxuWm"
+            },
+            "endpoint2": {
+              "style": "Open Arrow",
+              "connectedTo": "Ug_zD~vUYuon"
+            },
+            "textAreas": [],
+            "customData": [],
+            "linkedData": []
+          },
+          {
+            "id": "Tr_zdKeieNaC",
+            "endpoint1": {
+              "style": "None",
+              "connectedTo": "JhQzJWGa6Bl9"
+            },
+            "endpoint2": {
+              "style": "Open Arrow",
+              "connectedTo": "Ug_zD~vUYuon"
+            },
+            "textAreas": [],
+            "customData": [],
+            "linkedData": []
+          },
+          {
+            "id": "Fr_zeEs3Pv5o",
+            "endpoint1": {
+              "style": "None",
+              "connectedTo": "JhQzJWGa6Bl9"
+            },
+            "endpoint2": {
+              "style": "Open Arrow",
+              "connectedTo": "dh_zUbS7WuNn"
+            },
+            "textAreas": [],
+            "customData": [],
+            "linkedData": []
+          },
+          {
+            "id": "EpQzeUUrklH4",
+            "endpoint1": {
+              "style": "Aggregation",
+              "connectedTo": "ohQz~FQVroWX"
+            },
+            "endpoint2": {
+              "style": "None",
+              "connectedTo": "hhQzyD8bxuWm"
+            },
+            "textAreas": [
+              {
+                "label": "m1",
+                "text": "1"
+              },
+              {
+                "label": "t0",
+                "text": "Has"
+              },
+              {
+                "label": "m2",
+                "text": "0..*"
+              }
+            ],
+            "customData": [],
+            "linkedData": []
+          },
+          {
+            "id": "EvQzHxfvu8EY",
+            "endpoint1": {
+              "style": "None",
+              "connectedTo": "JhQzJWGa6Bl9"
+            },
+            "endpoint2": {
+              "style": "None",
+              "connectedTo": "hhQzyD8bxuWm"
+            },
+            "textAreas": [
+              {
+                "label": "m1",
+                "text": "1"
+              },
+              {
+                "label": "t0",
+                "text": "Results"
+              },
+              {
+                "label": "m2",
+                "text": "0..1"
+              }
+            ],
+            "customData": [],
+            "linkedData": []
+          },
+          {
+            "id": "PyQz3sabEbXy",
+            "endpoint1": {
+              "style": "None",
+              "connectedTo": "XgQz9Z1zWbry"
+            },
+            "endpoint2": {
+              "style": "None",
+              "connectedTo": "JhQzJWGa6Bl9"
+            },
+            "textAreas": [
+              {
+                "label": "m1",
+                "text": "1"
+              },
+              {
+                "label": "t0",
+                "text": "Initiates/monitors"
+              },
+              {
+                "label": "m2",
+                "text": "0..*"
+              }
+            ],
+            "customData": [],
+            "linkedData": []
+          },
+          {
+            "id": "As_zPprw7gWV",
+            "endpoint1": {
+              "style": "None",
+              "connectedTo": "hhQzyD8bxuWm"
+            },
+            "endpoint2": {
+              "style": "Open Arrow",
+              "connectedTo": "dh_zUbS7WuNn"
+            },
+            "textAreas": [],
+            "customData": [],
+            "linkedData": []
+          },
+          {
+            "id": "6q_zOdf8ZYXZ",
+            "endpoint1": {
+              "style": "None",
+              "connectedTo": "JhQzJWGa6Bl9"
+            },
+            "endpoint2": {
+              "style": "Open Arrow",
+              "connectedTo": "vg_zic64deoB"
+            },
+            "textAreas": [],
+            "customData": [],
+            "linkedData": []
+          },
+          {
+            "id": "Xs_z3wQV-hBP",
+            "endpoint1": {
+              "style": "None",
+              "connectedTo": "hhQzyD8bxuWm"
+            },
+            "endpoint2": {
+              "style": "Open Arrow",
+              "connectedTo": "Gh_zP2fMuYmf"
+            },
+            "textAreas": [],
+            "customData": [],
+            "linkedData": []
+          },
+          {
+            "id": "n_zR8-.3b.lK",
+            "endpoint1": {
+              "style": "None",
+              "connectedTo": ".-zRgI-u5FJO"
+            },
+            "endpoint2": {
+              "style": "None",
+              "connectedTo": "XgQz9Z1zWbry"
+            },
+            "textAreas": [
+              {
+                "label": "m1",
+                "text": "0..*"
+              },
+              {
+                "label": "t0",
+                "text": "Has"
+              },
+              {
+                "label": "m2",
+                "text": "1"
+              }
+            ],
+            "customData": [],
+            "linkedData": []
+          },
+          {
+            "id": "4aARX_z8~kRt",
+            "endpoint1": {
+              "style": "None",
+              "connectedTo": "g~zR7suzEVBf"
+            },
+            "endpoint2": {
+              "style": "None",
+              "connectedTo": "XgQz9Z1zWbry"
+            },
+            "textAreas": [
+              {
+                "label": "m1",
+                "text": "0..*"
+              },
+              {
+                "label": "t0",
+                "text": "Recieves"
+              },
+              {
+                "label": "m2",
+                "text": "1"
+              }
+            ],
+            "customData": [],
+            "linkedData": []
+          },
+          {
+            "id": "HcAR7rhCAZ8s",
+            "endpoint1": {
+              "style": "None",
+              "connectedTo": "hhQzyD8bxuWm"
+            },
+            "endpoint2": {
+              "style": "Open Arrow",
+              "connectedTo": "hhQzyD8bxuWm"
+            },
+            "textAreas": [],
+            "customData": [],
+            "linkedData": []
+          }
+        ],
+        "groups": [],
+        "layers": []
+      },
+      "customData": [],
+      "linkedData": []
+    }
+  ],
+  "data": {
+    "collections": []
+  },
+  "accountId": 204927086
+}
