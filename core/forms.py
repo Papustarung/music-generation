@@ -2,6 +2,26 @@ from django import forms
 from .models import Creator, Library, Song, GenerationJob
 
 
+class LoginForm(forms.Form):
+    email = forms.EmailField()
+    password = forms.CharField(widget=forms.PasswordInput)
+
+
+class RegisterForm(forms.Form):
+    email = forms.EmailField()
+    display_name = forms.CharField(max_length=255)
+    password = forms.CharField(widget=forms.PasswordInput)
+    password_confirm = forms.CharField(widget=forms.PasswordInput, label='Confirm password')
+
+    def clean(self):
+        cleaned_data = super().clean()
+        pw = cleaned_data.get('password')
+        pw2 = cleaned_data.get('password_confirm')
+        if pw and pw2 and pw != pw2:
+            raise forms.ValidationError('Passwords do not match.')
+        return cleaned_data
+
+
 class CreatorForm(forms.ModelForm):
     class Meta:
         model = Creator

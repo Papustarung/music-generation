@@ -1,5 +1,9 @@
 from django.urls import path
-from django.views.generic import RedirectView
+from .views.home_view import home_view
+from .views.auth_views import (
+    login_view, register_view, logout_view,
+    google_redirect_view, google_callback_view,
+)
 from .views.creator_views import (
     creator_list, creator_detail, creator_create, creator_update, creator_delete,
 )
@@ -15,8 +19,15 @@ from .views.generation_job_views import (
 )
 
 urlpatterns = [
-    # Home redirect
-    path('', RedirectView.as_view(url='/creators/', permanent=False), name='home'),
+    # Home
+    path('', home_view, name='home'),
+
+    # Auth
+    path('auth/login/', login_view, name='login'),
+    path('auth/register/', register_view, name='register'),
+    path('auth/logout/', logout_view, name='logout'),
+    path('auth/google/', google_redirect_view, name='google_redirect'),
+    path('auth/google/callback/', google_callback_view, name='google_callback'),
 
     # Creator
     path('creators/', creator_list, name='creator_list'),
