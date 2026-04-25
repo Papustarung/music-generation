@@ -39,7 +39,14 @@ class SunoSongGeneratorStrategy(SongGeneratorStrategy):
         is_instrumental = vocal == 'INSTRUMENTAL'
         genre = request.genre.lower()
 
-        # Build style tag — duet needs explicit descriptors, not just the word "duet"
+        # Voice type descriptors lock gender more reliably than generic words
+        STYLE_VOCAL_MAP = {
+            'MALE':   'male baritone vocals',
+            'FEMALE': 'female soprano vocals',
+            'RAP':    'rap vocals',
+        }
+
+        # Build style tag
         if is_instrumental:
             style_tag = genre
         elif vocal == 'DUET':
@@ -48,13 +55,18 @@ class SunoSongGeneratorStrategy(SongGeneratorStrategy):
                 f'both male and female vocals, male baritone and female soprano'
             )
         else:
-            style_tag = f'{genre} {request.vocal_style.lower()}'
+            vocal_descriptor = STYLE_VOCAL_MAP.get(vocal, request.vocal_style.lower())
+            style_tag = f'{genre}, {vocal_descriptor}'
 
         # Build prompt — prepend genre so Suno doesn't infer style from story content
         prompt = f"[{request.genre.capitalize()} style] {request.story}"
 
-        # Duet: global pre-song declaration (guide's gold standard technique)
-        if vocal == 'DUET':
+        # Reinforce vocal gender in prompt for male/female to prevent drift
+        if vocal == 'MALE':
+            prompt = f"[male vocalist] {prompt}"
+        elif vocal == 'FEMALE':
+            prompt = f"[female vocalist] {prompt}"
+        elif vocal == 'DUET':
             prompt = (
                 f"[This song is a male-female duet, one male vocalist and one female vocalist] ===\n"
                 f"{prompt}"

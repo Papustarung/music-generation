@@ -44,6 +44,24 @@ def song_update(request, pk):
 
 
 @login_required
+def song_stream(request, pk):
+    """Serve audio with range-request support so the browser seek bar works."""
+    song = get_object_or_404(Song, pk=pk, library__creator=request.user)
+    if not song.audio_location:
+        return HttpResponse(status=404)
+
+    if song.audio_location.startswith(settings.MEDIA_URL):
+        relative = song.audio_location[len(settings.MEDIA_URL):]
+        file_path = Path(settings.MEDIA_ROOT) / relative
+        if file_path.exists():
+            return FileResponse(file_path.open('rb'), content_type='audio/mpeg')
+
+    # Remote URL — redirect; the remote CDN handles range requests itself
+    from django.http import HttpResponseRedirect
+    return HttpResponseRedirect(song.audio_location)
+
+
+@login_required
 def song_download(request, pk):
     song = get_object_or_404(Song, pk=pk, library__creator=request.user)
     if not song.audio_location:

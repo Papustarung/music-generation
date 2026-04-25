@@ -16,6 +16,7 @@
       <source src="{{ song.audio_location }}" type="audio/mpeg">
       Your browser does not support the audio element.
     </audio>
+    {# shared page has no auth so it uses the raw URL directly — Suno CDN handles range requests #}
   </div>
   {% else %}
   <div class="card" style="margin-bottom:1.5rem;text-align:center;">
