@@ -45,20 +45,54 @@ def song_update(request, pk):
 
 @login_required
 def song_stream(request, pk):
-    """Serve audio with range-request support so the browser seek bar works."""
+    """Serve audio with proper range-request (HTTP 206) support for seek bar."""
     song = get_object_or_404(Song, pk=pk, library__creator=request.user)
     if not song.audio_location:
         return HttpResponse(status=404)
 
-    if song.audio_location.startswith(settings.MEDIA_URL):
-        relative = song.audio_location[len(settings.MEDIA_URL):]
-        file_path = Path(settings.MEDIA_ROOT) / relative
-        if file_path.exists():
-            return FileResponse(file_path.open('rb'), content_type='audio/mpeg')
+    # Remote URL — redirect; the CDN handles its own range requests
+    if not song.audio_location.startswith(settings.MEDIA_URL):
+        from django.http import HttpResponseRedirect
+        return HttpResponseRedirect(song.audio_location)
 
-    # Remote URL — redirect; the remote CDN handles range requests itself
-    from django.http import HttpResponseRedirect
-    return HttpResponseRedirect(song.audio_location)
+    relative = song.audio_location[len(settings.MEDIA_URL):]
+    file_path = Path(settings.MEDIA_ROOT) / relative
+    if not file_path.exists():
+        return HttpResponse(status=404)
+
+    file_size = file_path.stat().st_size
+    range_header = request.META.get('HTTP_RANGE', '').strip()
+
+    if range_header.startswith('bytes='):
+        range_spec = range_header[6:]
+        start_str, _, end_str = range_spec.partition('-')
+        try:
+            start = int(start_str)
+            end = int(end_str) if end_str else file_size - 1
+        except ValueError:
+            return HttpResponse(status=416)  # Range Not Satisfiable
+
+        if start > end or end >= file_size:
+            response = HttpResponse(status=416)
+            response['Content-Range'] = f'bytes */{file_size}'
+            return response
+
+        length = end - start + 1
+        with file_path.open('rb') as f:
+            f.seek(start)
+            data = f.read(length)
+
+        response = HttpResponse(data, status=206, content_type='audio/mpeg')
+        response['Content-Range'] = f'bytes {start}-{end}/{file_size}'
+        response['Content-Length'] = length
+        response['Accept-Ranges'] = 'bytes'
+        return response
+
+    # Full file response
+    resp = FileResponse(file_path.open('rb'), content_type='audio/mpeg')
+    resp['Content-Length'] = file_size
+    resp['Accept-Ranges'] = 'bytes'
+    return resp
 
 
 @login_required
