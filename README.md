@@ -66,7 +66,7 @@ The application will be available at `http://127.0.0.1:8000/`.
 
 ---
 
-## CRUD Operations
+## CRUD Operations (For exercise 3 only)
 
 ### HTML Interface (Function-Based Views)
 
