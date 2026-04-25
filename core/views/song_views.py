@@ -1,31 +1,32 @@
-from django.shortcuts import render, get_object_or_404, redirect
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import get_object_or_404, redirect, render
+
 from ..models import Song
 from ..forms import SongForm
 
 
+@login_required
 def song_list(request):
-    songs = Song.objects.select_related('library__creator').all()
+    """FR-16/FR-17/FR-18: Show only the signed-in creator's songs."""
+    songs = (
+        Song.objects
+        .filter(library__creator=request.user)
+        .order_by('-id')
+    )
     return render(request, 'song/list.html', {'songs': songs})
 
 
+@login_required
 def song_detail(request, pk):
-    song = get_object_or_404(Song, pk=pk)
+    """FR-16/FR-19: Open a song — restricted to its owner."""
+    song = get_object_or_404(Song, pk=pk, library__creator=request.user)
     return render(request, 'song/detail.html', {'song': song})
 
 
-def song_create(request):
-    if request.method == 'POST':
-        form = SongForm(request.POST)
-        if form.is_valid():
-            song = form.save()
-            return redirect('song_detail', pk=song.pk)
-    else:
-        form = SongForm()
-    return render(request, 'song/form.html', {'form': form, 'title': 'Create Song'})
-
-
+@login_required
 def song_update(request, pk):
-    song = get_object_or_404(Song, pk=pk)
+    """Allow creator to toggle visibility or edit metadata (FR-18)."""
+    song = get_object_or_404(Song, pk=pk, library__creator=request.user)
     if request.method == 'POST':
         form = SongForm(request.POST, instance=song)
         if form.is_valid():
@@ -36,9 +37,12 @@ def song_update(request, pk):
     return render(request, 'song/form.html', {'form': form, 'title': 'Edit Song'})
 
 
+@login_required
 def song_delete(request, pk):
-    song = get_object_or_404(Song, pk=pk)
+    """FR-20: Delete a song from the library."""
+    song = get_object_or_404(Song, pk=pk, library__creator=request.user)
     if request.method == 'POST':
         song.delete()
         return redirect('song_list')
     return render(request, 'song/confirm_delete.html', {'object': song})
+

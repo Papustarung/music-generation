@@ -1,11 +1,60 @@
 {% extends "core/base.html" %}
 {% block title %}{{ title }}{% endblock %}
 {% block content %}
-<h1>{{ title }}</h1>
-<form method="post">
-  {% csrf_token %}
-  {{ form.as_p }}
-  <button type="submit">Save</button>
-  <a href="{% url 'generation_job_list' %}">Cancel</a>
-</form>
+<div style="max-width:640px;margin:2rem auto;">
+  <h2 style="margin-bottom:1.5rem;">{{ title }}</h2>
+
+  {% if show_rules %}
+  <div class="card" style="margin-bottom:1.5rem;border-color:#7c3aed;">
+    <p style="color:#a78bfa;font-weight:600;margin:0 0 .75rem;">&#9888; Content Rules</p>
+    <ul style="margin:0;padding-left:1.25rem;color:#cbd5e1;font-size:.9rem;line-height:1.8;">
+      {% for rule in rules %}
+      <li>{{ rule }}</li>
+      {% endfor %}
+    </ul>
+  </div>
+  {% endif %}
+
+  <div class="card">
+    <form method="post" novalidate>
+      {% csrf_token %}
+
+      {% for field in form %}
+        {% if field.name == 'content_rules_accepted' %}
+        <div style="margin-top:1.25rem;padding-top:1.25rem;border-top:1px solid #334155;">
+          <label style="display:flex;align-items:flex-start;gap:.6rem;cursor:pointer;font-size:.9rem;color:#cbd5e1;">
+            {{ field }}
+            <span>{{ field.label }}</span>
+          </label>
+          {% for error in field.errors %}
+            <div style="color:#f87171;margin-top:.25rem;font-size:.875rem;">{{ error }}</div>
+          {% endfor %}
+        </div>
+        {% else %}
+        <div style="margin-bottom:1.25rem;">
+          <label for="{{ field.id_for_label }}" style="display:block;margin-bottom:.4rem;font-weight:500;">{{ field.label }}</label>
+          {{ field }}
+          {% if field.help_text %}
+            <small style="color:#94a3b8;">{{ field.help_text }}</small>
+          {% endif %}
+          {% for error in field.errors %}
+            <div style="color:#f87171;margin-top:.25rem;font-size:.875rem;">{{ error }}</div>
+          {% endfor %}
+        </div>
+        {% endif %}
+      {% endfor %}
+
+      {% if form.non_field_errors %}
+      <div style="color:#f87171;margin-bottom:1rem;font-size:.875rem;padding:.75rem;background:#450a0a;border-radius:.5rem;">
+        {% for error in form.non_field_errors %}{{ error }}{% endfor %}
+      </div>
+      {% endif %}
+
+      <div style="display:flex;gap:.75rem;margin-top:1.5rem;">
+        <button type="submit" class="btn btn-primary btn-full">&#9834; Generate</button>
+        <a href="{% url 'generation_job_list' %}" class="btn btn-secondary btn-full">Cancel</a>
+      </div>
+    </form>
+  </div>
+</div>
 {% endblock %}

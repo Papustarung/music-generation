@@ -1,16 +1,88 @@
 {% extends "core/base.html" %}
-{% block title %}Songs{% endblock %}
+{% block title %}My Library{% endblock %}
 {% block content %}
-<h1>Songs</h1>
-<a href="{% url 'song_create' %}">+ New Song</a>
-<ul>
-  {% for song in songs %}
-    <li>
-      <a href="{% url 'song_detail' song.pk %}">{{ song.title }}</a>
-      — {{ song.genre }} | {{ song.vocal_style }} | {{ song.occasion }}
-    </li>
-  {% empty %}
-    <li>No songs yet.</li>
-  {% endfor %}
-</ul>
+<div style="max-width:760px;margin:2rem auto;">
+
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;">
+    <h2 style="margin:0;">My Library</h2>
+    <a href="{% url 'generation_job_create' %}" class="btn btn-primary">+ Generate Song</a>
+  </div>
+
+  {% if songs %}
+  <div style="display:flex;flex-direction:column;gap:.75rem;">
+    {% for song in songs %}
+    <div class="card song-item" style="padding:0;overflow:hidden;">
+
+      {# ── Collapsed row (click to expand) ── #}
+      <div class="song-row"
+           style="display:flex;align-items:center;justify-content:space-between;gap:1rem;padding:1rem 1.25rem;cursor:pointer;user-select:none;"
+           onclick="toggleSong(this)">
+        <div style="flex:1;min-width:0;">
+          <div style="color:#e2e8f0;font-weight:600;">{{ song.title }}</div>
+          <div style="font-size:.8rem;color:#94a3b8;margin-top:.25rem;">
+            {{ song.get_genre_display }} &middot; {{ song.get_vocal_style_display }} &middot; {{ song.get_occasion_display }}
+          </div>
+        </div>
+        <span class="song-chevron" style="color:#a78bfa;font-size:1.25rem;line-height:1;transition:transform .2s;">&#8250;</span>
+      </div>
+
+      {# ── Expanded panel ── #}
+      <div class="song-panel" style="display:none;border-top:1px solid #1e293b;padding:1.25rem;">
+        {% if song.audio_location %}
+        <audio class="song-audio" controls style="width:100%;height:48px;margin-bottom:1.25rem;">
+          <source src="{{ song.audio_location }}" type="audio/mpeg">
+          Your browser does not support the audio element.
+        </audio>
+        {% else %}
+        <p style="color:#475569;font-size:.875rem;margin:0 0 1.25rem;">No audio available.</p>
+        {% endif %}
+        <dl style="display:grid;grid-template-columns:max-content 1fr;gap:.5rem 1.5rem;font-size:.875rem;margin-bottom:1.25rem;">
+          <dt style="color:#94a3b8;">Genre</dt>       <dd style="margin:0;">{{ song.get_genre_display }}</dd>
+          <dt style="color:#94a3b8;">Vocal style</dt> <dd style="margin:0;">{{ song.get_vocal_style_display }}</dd>
+          <dt style="color:#94a3b8;">Occasion</dt>    <dd style="margin:0;">{{ song.get_occasion_display }}</dd>
+          {% if song.created_at %}
+          <dt style="color:#94a3b8;">Generated</dt>   <dd style="margin:0;">{{ song.created_at|date:"N j, Y" }}</dd>
+          {% endif %}
+        </dl>
+        <a href="{% url 'song_detail' song.pk %}" class="btn btn-secondary" style="font-size:.85rem;">View full details</a>
+      </div>
+
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="card" style="text-align:center;padding:3rem;">
+    <p style="color:#94a3b8;margin-bottom:1.25rem;">Your library is empty. Generate your first song!</p>
+    <a href="{% url 'generation_job_create' %}" class="btn btn-primary">Generate a Song</a>
+  </div>
+  {% endif %}
+
+</div>
+
+<script>
+function toggleSong(rowEl) {
+  const card = rowEl.closest('.song-item');
+  const panel = card.querySelector('.song-panel');
+  const chevron = card.querySelector('.song-chevron');
+  const isOpen = panel.style.display !== 'none';
+
+  // Collapse all panels first
+  document.querySelectorAll('.song-panel').forEach(p => { p.style.display = 'none'; });
+  document.querySelectorAll('.song-chevron').forEach(c => { c.style.transform = ''; });
+
+  if (!isOpen) {
+    panel.style.display = 'block';
+    chevron.style.transform = 'rotate(90deg)';
+  }
+}
+
+// Pause all other audio tracks when one starts playing
+document.addEventListener('play', function (e) {
+  if (e.target.classList.contains('song-audio')) {
+    document.querySelectorAll('.song-audio').forEach(function (a) {
+      if (a !== e.target) { a.pause(); }
+    });
+  }
+}, true);
+</script>
 {% endblock %}

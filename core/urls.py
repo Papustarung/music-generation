@@ -7,16 +7,14 @@ from .views.auth_views import (
 from .views.creator_views import (
     creator_list, creator_detail, creator_create, creator_update, creator_delete,
 )
-from .views.library_views import (
-    library_list, library_detail, library_create, library_update, library_delete,
-)
 from .views.song_views import (
-    song_list, song_detail, song_create, song_update, song_delete,
+    song_list, song_detail, song_update, song_delete,
 )
 from .views.generation_job_views import (
     generation_job_list, generation_job_detail, generation_job_create,
     generation_job_update, generation_job_delete,
 )
+from .views.webhook_views import suno_webhook
 
 urlpatterns = [
     # Home
@@ -29,26 +27,21 @@ urlpatterns = [
     path('auth/google/', google_redirect_view, name='google_redirect'),
     path('auth/google/callback/', google_callback_view, name='google_callback'),
 
-    # Creator
+    # Creator (admin-style management)
     path('creators/', creator_list, name='creator_list'),
     path('creators/create/', creator_create, name='creator_create'),
     path('creators/<int:pk>/', creator_detail, name='creator_detail'),
     path('creators/<int:pk>/edit/', creator_update, name='creator_update'),
     path('creators/<int:pk>/delete/', creator_delete, name='creator_delete'),
 
-    # Library
-    path('libraries/', library_list, name='library_list'),
-    path('libraries/create/', library_create, name='library_create'),
-    path('libraries/<int:pk>/', library_detail, name='library_detail'),
-    path('libraries/<int:pk>/edit/', library_update, name='library_update'),
-    path('libraries/<int:pk>/delete/', library_delete, name='library_delete'),
-
-    # Song
+    # Library — FR-17: personal library of songs (read + manage songs only)
     path('songs/', song_list, name='song_list'),
-    path('songs/create/', song_create, name='song_create'),
     path('songs/<int:pk>/', song_detail, name='song_detail'),
     path('songs/<int:pk>/edit/', song_update, name='song_update'),
     path('songs/<int:pk>/delete/', song_delete, name='song_delete'),
+
+    # Suno webhook (no auth — external callback)
+    path('jobs/webhook/suno/', suno_webhook, name='suno_webhook'),
 
     # Generation Job
     path('jobs/', generation_job_list, name='generation_job_list'),

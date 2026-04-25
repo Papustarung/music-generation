@@ -12,6 +12,7 @@ class Song(models.Model):
   visibility = models.CharField(max_length=20, choices=Visibility.choices, default=Visibility.PRIVATE)
   lyrics = models.TextField(blank=True, null=True)
   audio_location = models.CharField(max_length=500, blank=True, null=True)
+  created_at = models.DateTimeField(auto_now_add=True, null=True)
 
   def __str__(self):
     return self.title

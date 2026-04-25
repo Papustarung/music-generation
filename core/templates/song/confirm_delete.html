@@ -1,11 +1,15 @@
 {% extends "core/base.html" %}
 {% block title %}Delete Song{% endblock %}
 {% block content %}
-<h1>Delete Song</h1>
-<p>Are you sure you want to delete <strong>{{ object }}</strong>?</p>
-<form method="post">
-  {% csrf_token %}
-  <button type="submit">Yes, Delete</button>
-  <a href="{% url 'song_list' %}">Cancel</a>
-</form>
+<div class="card" style="max-width:480px;margin:2rem auto;">
+  <h2 style="margin-bottom:.75rem;">Delete Song</h2>
+  <p style="color:#94a3b8;margin-bottom:1.5rem;">Are you sure you want to delete <strong style="color:#e2e8f0;">{{ object }}</strong>? This cannot be undone.</p>
+  <form method="post">
+    {% csrf_token %}
+    <div style="display:flex;gap:.75rem;">
+      <button type="submit" class="btn" style="color:#f87171;border-color:#7f1d1d;">Yes, Delete</button>
+      <a href="{% url 'song_list' %}" class="btn btn-secondary">Cancel</a>
+    </div>
+  </form>
+</div>
 {% endblock %}

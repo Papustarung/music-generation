@@ -9,6 +9,7 @@ class GenerationJob(models.Model):
 
   status = models.CharField(max_length=20, choices=JobStatus.choices, default=JobStatus.QUEUED)
   requested_at = models.DateTimeField(auto_now_add=True)
+  task_id = models.CharField(max_length=255, blank=True, null=True)
 
   title = models.CharField(max_length=255)
   story = models.TextField()

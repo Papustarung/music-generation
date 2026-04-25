@@ -1,16 +1,43 @@
 {% extends "core/base.html" %}
-{% block title %}Generation Jobs{% endblock %}
+{% block title %}My Jobs{% endblock %}
 {% block content %}
-<h1>Generation Jobs</h1>
-<a href="{% url 'generation_job_create' %}">+ New Job</a>
-<ul>
-  {% for job in jobs %}
-    <li>
-      <a href="{% url 'generation_job_detail' job.pk %}">Job #{{ job.pk }}: {{ job.title }}</a>
-      — {{ job.get_status_display }} | {{ job.creator }}
-    </li>
-  {% empty %}
-    <li>No jobs yet.</li>
-  {% endfor %}
-</ul>
+<div style="max-width:760px;margin:2rem auto;">
+
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;">
+    <h2 style="margin:0;">My Generation Jobs</h2>
+    <a href="{% url 'generation_job_create' %}" class="btn btn-primary">+ New Song</a>
+  </div>
+
+  {% if jobs %}
+  <div style="display:flex;flex-direction:column;gap:1rem;">
+    {% for job in jobs %}
+    <a href="{% url 'generation_job_detail' job.pk %}" style="text-decoration:none;">
+      <div class="card" style="display:flex;align-items:center;justify-content:space-between;">
+        <div>
+          <div style="font-weight:600;margin-bottom:.25rem;">{{ job.title }}</div>
+          <div style="font-size:.8rem;color:#94a3b8;">{{ job.requested_at|date:"N j, Y, P" }}</div>
+        </div>
+        {% if job.status == 'QUEUED' %}
+          <span style="background:#475569;color:#f1f5f9;padding:.2rem .65rem;border-radius:999px;font-size:.75rem;font-weight:600;">Queued</span>
+        {% elif job.status == 'GENERATING' %}
+          <span style="background:#92400e;color:#fef3c7;padding:.2rem .65rem;border-radius:999px;font-size:.75rem;font-weight:600;">Generating&hellip;</span>
+        {% elif job.status == 'SAVING' %}
+          <span style="background:#1e3a5f;color:#bfdbfe;padding:.2rem .65rem;border-radius:999px;font-size:.75rem;font-weight:600;">Saving</span>
+        {% elif job.status == 'COMPLETED' %}
+          <span style="background:#14532d;color:#bbf7d0;padding:.2rem .65rem;border-radius:999px;font-size:.75rem;font-weight:600;">Completed</span>
+        {% elif job.status == 'FAILED' %}
+          <span style="background:#7f1d1d;color:#fecaca;padding:.2rem .65rem;border-radius:999px;font-size:.75rem;font-weight:600;">Failed</span>
+        {% endif %}
+      </div>
+    </a>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="card" style="text-align:center;padding:3rem;">
+    <p style="color:#94a3b8;margin-bottom:1.25rem;">You haven't generated any songs yet.</p>
+    <a href="{% url 'generation_job_create' %}" class="btn btn-primary">Generate Your First Song</a>
+  </div>
+  {% endif %}
+
+</div>
 {% endblock %}

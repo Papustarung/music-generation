@@ -1,21 +1,52 @@
 {% extends "core/base.html" %}
 {% block title %}{{ song.title }}{% endblock %}
 {% block content %}
-<h1>{{ song.title }}</h1>
-<ul>
-  <li>ID: {{ song.pk }}</li>
-  <li>Library: <a href="{% url 'library_detail' song.library.pk %}">{{ song.library }}</a></li>
-  <li>Story: {{ song.story }}</li>
-  <li>Genre: {{ song.get_genre_display }}</li>
-  <li>Vocal Style: {{ song.get_vocal_style_display }}</li>
-  <li>Occasion: {{ song.get_occasion_display }}</li>
-  <li>Visibility: {{ song.get_visibility_display }}</li>
-  <li>Lyrics: {{ song.lyrics|default:"—" }}</li>
-  <li>Audio Location: {{ song.audio_location|default:"—" }}</li>
-</ul>
-<p>
-  <a href="{% url 'song_update' song.pk %}">Edit</a> |
-  <a href="{% url 'song_delete' song.pk %}">Delete</a> |
-  <a href="{% url 'song_list' %}">Back to list</a>
-</p>
+<div style="max-width:680px;margin:2rem auto;">
+
+  {# ── Header ── #}
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;">
+    <h2 style="margin:0;">{{ song.title }}</h2>
+    <span style="font-size:.8rem;color:#94a3b8;background:#1e293b;padding:.2rem .65rem;border-radius:999px;">{{ song.get_visibility_display }}</span>
+  </div>
+
+  {# ── Audio player ── #}
+  {% if song.audio_location %}
+  <div class="card" style="margin-bottom:1.5rem;">
+    <p style="color:#a78bfa;font-weight:600;margin:0 0 1rem;font-size:1rem;">&#9834; Listen</p>
+    <audio controls style="width:100%;height:48px;">
+      <source src="{{ song.audio_location }}" type="audio/mpeg">
+      Your browser does not support the audio element.
+    </audio>
+  </div>
+  {% endif %}
+
+  {# ── Metadata ── #}
+  <div class="card" style="margin-bottom:1.5rem;">
+    <dl style="display:grid;grid-template-columns:max-content 1fr;gap:.6rem 1.5rem;">
+      <dt style="color:#94a3b8;">Genre</dt>        <dd style="margin:0;">{{ song.get_genre_display }}</dd>
+      <dt style="color:#94a3b8;">Vocal style</dt>  <dd style="margin:0;">{{ song.get_vocal_style_display }}</dd>
+      <dt style="color:#94a3b8;">Occasion</dt>     <dd style="margin:0;">{{ song.get_occasion_display }}</dd>
+      {% if song.created_at %}
+      <dt style="color:#94a3b8;">Generated</dt>    <dd style="margin:0;">{{ song.created_at|date:"N j, Y, P" }}</dd>
+      {% endif %}
+    </dl>
+    <p style="color:#94a3b8;margin-top:1.1rem;margin-bottom:.35rem;font-size:.875rem;">Story</p>
+    <p style="margin:0;">{{ song.story }}</p>
+  </div>
+
+  {# ── Lyrics (only shown if the user provided custom lyrics) ── #}
+  {% if song.lyrics %}
+  <div class="card" style="margin-bottom:1.5rem;">
+    <p style="color:#94a3b8;font-size:.875rem;margin:0 0 .6rem;">Custom Lyrics</p>
+    <pre style="white-space:pre-wrap;font-family:inherit;color:#e2e8f0;margin:0;line-height:1.6;">{{ song.lyrics }}</pre>
+  </div>
+  {% endif %}
+
+  <div style="display:flex;gap:.75rem;margin-top:1.25rem;">
+    <a href="{% url 'song_list' %}" class="btn btn-secondary">&larr; My Library</a>
+    <a href="{% url 'song_update' song.pk %}" class="btn btn-secondary">Edit visibility</a>
+    <a href="{% url 'song_delete' song.pk %}" class="btn" style="color:#f87171;border-color:#7f1d1d;">Delete</a>
+  </div>
+
+</div>
 {% endblock %}
