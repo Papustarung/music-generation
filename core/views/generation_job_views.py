@@ -7,6 +7,8 @@ from django.shortcuts import get_object_or_404, redirect, render
 from ..forms import GenerateSongForm, CONTENT_RULES
 from ..models import GenerationJob
 from ..models.enum.job_status import JobStatus
+from ..notifications import notify
+from ..models.entities.notification import Notification
 
 logger = logging.getLogger(__name__)
 
@@ -70,6 +72,9 @@ def generation_job_create(request):
             occasion=form.cleaned_data['occasion'],
             lyrics=form.cleaned_data.get('lyrics') or None,
         )
+
+        # FR-14: tokens sufficient — notify and proceed
+        notify(request.user, 'Tokens are sufficient. Your song generation has started.', Notification.Level.INFO)
 
         # daemon=False → thread outlives the HTTP request (FR-09)
         thread = threading.Thread(

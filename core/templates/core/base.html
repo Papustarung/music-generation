@@ -231,6 +231,12 @@
       <a href="{% url 'song_list' %}" class="nav-link">My Library</a>
     </div>
     <div class="nav-user">
+      <a href="{% url 'notification_list' %}" style="position:relative;color:#b0b0c8;text-decoration:none;padding:4px 8px;border-radius:6px;font-size:1.1rem;" title="Notifications">
+        &#128276;
+        {% if unread_notification_count %}
+        <span style="position:absolute;top:-2px;right:-2px;background:#a78bfa;color:#0f0f14;font-size:.65rem;font-weight:700;min-width:16px;height:16px;border-radius:999px;display:flex;align-items:center;justify-content:center;padding:0 3px;">{{ unread_notification_count }}</span>
+        {% endif %}
+      </a>
       <span class="nav-username">{{ user.display_name|default:user.email }}</span>
       <a href="{% url 'logout' %}" class="btn-nav-logout">Sign out</a>
     </div>

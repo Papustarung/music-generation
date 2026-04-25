@@ -8,13 +8,14 @@ from .views.creator_views import (
     creator_list, creator_detail, creator_create, creator_update, creator_delete,
 )
 from .views.song_views import (
-    song_list, song_detail, song_update, song_delete,
+    song_list, song_detail, song_update, song_delete, shared_song,
 )
 from .views.generation_job_views import (
     generation_job_list, generation_job_detail, generation_job_create,
     generation_job_update, generation_job_delete,
 )
 from .views.webhook_views import suno_webhook
+from .views.notification_views import notification_list
 
 urlpatterns = [
     # Home
@@ -34,11 +35,16 @@ urlpatterns = [
     path('creators/<int:pk>/edit/', creator_update, name='creator_update'),
     path('creators/<int:pk>/delete/', creator_delete, name='creator_delete'),
 
+    # Public shared song — no auth required (FR-31/FR-32/FR-33)
+    path('songs/shared/<uuid:token>/', shared_song, name='shared_song'),
+
     # Library — FR-17: personal library of songs (read + manage songs only)
     path('songs/', song_list, name='song_list'),
     path('songs/<int:pk>/', song_detail, name='song_detail'),
     path('songs/<int:pk>/edit/', song_update, name='song_update'),
     path('songs/<int:pk>/delete/', song_delete, name='song_delete'),
+
+    path('notifications/', notification_list, name='notification_list'),
 
     # Suno webhook (no auth — external callback)
     path('jobs/webhook/suno/', suno_webhook, name='suno_webhook'),

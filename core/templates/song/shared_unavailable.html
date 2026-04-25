@@ -1,0 +1,14 @@
+{% extends "core/base.html" %}
+{% block title %}Song Not Available{% endblock %}
+{% block content %}
+<div style="max-width:480px;margin:5rem auto;text-align:center;">
+  <div class="card">
+    <p style="font-size:2.5rem;margin:0 0 1rem;">&#128274;</p>
+    <h2 style="margin:0 0 .75rem;">Song Not Available</h2>
+    <p style="color:#94a3b8;margin:0 0 1.5rem;">
+      This link has been revoked or the song has been set to private by its creator.
+    </p>
+    <a href="{% url 'home' %}" class="btn btn-secondary">Go Home</a>
+  </div>
+</div>
+{% endblock %}

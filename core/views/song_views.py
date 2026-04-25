@@ -3,6 +3,7 @@ from django.shortcuts import get_object_or_404, redirect, render
 
 from ..models import Song
 from ..forms import SongForm
+from ..models.enum.visibility import Visibility
 
 
 @login_required
@@ -35,6 +36,14 @@ def song_update(request, pk):
     else:
         form = SongForm(instance=song)
     return render(request, 'song/form.html', {'form': form, 'title': 'Edit Song'})
+
+
+def shared_song(request, token):
+    """FR-31 / FR-32 / FR-33: Public shared song — no login required."""
+    song = get_object_or_404(Song, share_token=token)
+    if song.visibility != Visibility.SHARED:
+        return render(request, 'song/shared_unavailable.html', status=403)
+    return render(request, 'song/shared.html', {'song': song})
 
 
 @login_required

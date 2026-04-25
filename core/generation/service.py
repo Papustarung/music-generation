@@ -8,6 +8,8 @@ from django.conf import settings
 
 from core.generation.factory import SongGeneratorFactory
 from core.generation.strategies.base import GenerationRequest, GenerationResult
+from core.notifications import notify
+from core.models.entities.notification import Notification
 
 logger = logging.getLogger(__name__)
 
@@ -57,6 +59,7 @@ class GenerationService:
         if not result.success:
             logger.warning("Generation failed for job %s: %s", job.pk, result.error)
             self._set_status(job, 'FAILED')
+            notify(job.creator, f'"{job.title}" could not be generated. Please try again.', Notification.Level.ERROR)
             return
 
         # Persist task_id so it survives across requests (Suno async)
@@ -74,6 +77,7 @@ class GenerationService:
                 return
             if result is None or not result.success:
                 self._set_status(job, 'FAILED')
+                notify(job.creator, f'"{job.title}" could not be generated. Please try again.', Notification.Level.ERROR)
                 return
 
         # ── 4. Save generated song (SAVING state) ─────────────────────────
@@ -89,11 +93,13 @@ class GenerationService:
         except Exception:
             logger.exception("Error saving generated song for job %s", job.pk)
             self._set_status(job, 'FAILED')
+            notify(job.creator, f'"{job.title}" could not be generated. Please try again.', Notification.Level.ERROR)
             return
 
         # ── 5. Done ────────────────────────────────────────────────────────
         self._set_status(job, 'COMPLETED')
         job.save(update_fields=['song'])
+        notify(job.creator, f'"{job.title}" has been generated and saved to your library.', Notification.Level.SUCCESS)
 
     # ── Private helpers ────────────────────────────────────────────────────
 

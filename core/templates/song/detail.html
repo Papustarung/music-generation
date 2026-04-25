@@ -3,11 +3,35 @@
 {% block content %}
 <div style="max-width:680px;margin:2rem auto;">
 
-  {# ── Header ── #}
-  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;">
-    <h2 style="margin:0;">{{ song.title }}</h2>
-    <span style="font-size:.8rem;color:#94a3b8;background:#1e293b;padding:.2rem .65rem;border-radius:999px;">{{ song.get_visibility_display }}</span>
+  {# ── Header row ── #}
+  <div style="display:flex;align-items:center;gap:.75rem;margin-bottom:1rem;flex-wrap:wrap;">
+    <a href="{% url 'song_list' %}" class="btn btn-secondary btn-sm">&larr; My Library</a>
+    <h2 style="margin:0;flex:1;">{{ song.title }}</h2>
+
+    {# Inline visibility toggle — auto-submits, stays on this page #}
+    <form method="post" action="{% url 'song_update' song.pk %}" style="margin:0;display:flex;justify-content:center;">
+      {% csrf_token %}
+      <select name="visibility" onchange="this.form.submit()"
+        style="background:#1e293b;border:1px solid #334155;color:#e2e8f0;border-radius:6px;padding:.2rem .6rem;font-size:.8rem;cursor:pointer;">
+        <option value="PRIVATE" {% if song.visibility == 'PRIVATE' %}selected{% endif %}>&#128274; Private</option>
+        <option value="SHARED"  {% if song.visibility == 'SHARED'  %}selected{% endif %}>&#127760; Shared</option>
+      </select>
+    </form>
   </div>
+
+  {# ── Share link (directly below header when shared) ── #}
+  {% if song.visibility == 'SHARED' %}
+  <div class="card" style="margin-bottom:1.5rem;">
+    <p style="color:#a78bfa;font-weight:600;margin:0 0 .6rem;font-size:.9rem;">&#128279; Share Link</p>
+    <div style="display:flex;gap:.5rem;align-items:center;">
+      <input id="share-url" type="text" readonly
+        value="{{ request.scheme }}://{{ request.get_host }}{% url 'shared_song' song.share_token %}"
+        style="flex:1;background:#0f172a;border:1px solid #334155;color:#e2e8f0;padding:.4rem .6rem;border-radius:.375rem;font-size:.8rem;margin-bottom:0;">
+      <button onclick="navigator.clipboard.writeText(document.getElementById('share-url').value);this.textContent='Copied!';"
+        class="btn btn-secondary" style="font-size:.8rem;padding:.4rem .75rem;white-space:nowrap;">Copy</button>
+    </div>
+  </div>
+  {% endif %}
 
   {# ── Audio player ── #}
   {% if song.audio_location %}
@@ -34,18 +58,17 @@
     <p style="margin:0;">{{ song.story }}</p>
   </div>
 
-  {# ── Lyrics (only shown if the user provided custom lyrics) ── #}
+  {# ── Lyrics ── #}
   {% if song.lyrics %}
   <div class="card" style="margin-bottom:1.5rem;">
-    <p style="color:#94a3b8;font-size:.875rem;margin:0 0 .6rem;">Custom Lyrics</p>
+    <p style="color:#94a3b8;font-size:.875rem;margin:0 0 .6rem;">Lyrics</p>
     <pre style="white-space:pre-wrap;font-family:inherit;color:#e2e8f0;margin:0;line-height:1.6;">{{ song.lyrics }}</pre>
   </div>
   {% endif %}
 
-  <div style="display:flex;gap:.75rem;margin-top:1.25rem;">
-    <a href="{% url 'song_list' %}" class="btn btn-secondary">&larr; My Library</a>
-    <a href="{% url 'song_update' song.pk %}" class="btn btn-secondary">Edit visibility</a>
-    <a href="{% url 'song_delete' song.pk %}" class="btn" style="color:#f87171;border-color:#7f1d1d;">Delete</a>
+  {# ── Delete at the bottom ── #}
+  <div style="margin-top:1.25rem;">
+    <a href="{% url 'song_delete' song.pk %}" class="btn btn-sm" style="color:#f87171;border:1px solid #7f1d1d;background:transparent;">Delete</a>
   </div>
 
 </div>

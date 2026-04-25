@@ -1,0 +1,36 @@
+{% extends "core/base.html" %}
+{% block title %}Notifications{% endblock %}
+{% block content %}
+<div style="max-width:640px;margin:2rem auto;">
+  <h2 style="margin-bottom:1.5rem;">Notifications</h2>
+
+  {% if notifications %}
+  <div class="card" style="padding:0;overflow:hidden;">
+    {% for n in notifications %}
+    <div style="display:flex;gap:1rem;align-items:flex-start;padding:1rem 1.25rem;border-bottom:1px solid #20202e;">
+      {% if n.level == 'SUCCESS' %}
+        <span style="font-size:1.1rem;margin-top:.1rem;">&#10003;</span>
+      {% elif n.level == 'ERROR' %}
+        <span style="font-size:1.1rem;margin-top:.1rem;">&#10007;</span>
+      {% else %}
+        <span style="font-size:1.1rem;margin-top:.1rem;">&#8505;</span>
+      {% endif %}
+      <div style="flex:1;">
+        <p style="margin:0;font-size:.9rem;
+          {% if n.level == 'SUCCESS' %}color:#86efac;
+          {% elif n.level == 'ERROR' %}color:#fca5a5;
+          {% else %}color:#e2e8f0;{% endif %}">
+          {{ n.message }}
+        </p>
+        <p style="margin:.25rem 0 0;font-size:.75rem;color:#64748b;">{{ n.created_at|date:"N j, Y, P" }}</p>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="card" style="text-align:center;color:#94a3b8;">
+    <p style="margin:0;">No notifications yet.</p>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

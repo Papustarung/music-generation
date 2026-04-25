@@ -89,16 +89,25 @@ def _handle_webhook_completion(job_id: str, audio_url: str, lyrics: str) -> None
             lyrics=lyrics,
         )
 
+        from core.notifications import notify
+        from core.models.entities.notification import Notification
+
         service = GenerationService()
         job.status = 'SAVING'
         job.save(update_fields=['status'])
         service._save_song(job, result)
         job.status = 'COMPLETED'
         job.save(update_fields=['status', 'song'])
+        notify(job.creator, f'"{job.title}" has been generated and saved to your library.', Notification.Level.SUCCESS)
         logger.info("Suno webhook: job %s completed successfully", job_id)
     except Exception:
         logger.exception("Error handling Suno webhook completion for job %s", job_id)
-        from core.models import GenerationJob
-        GenerationJob.objects.filter(pk=job_id).update(status='FAILED')
+        from core.models import GenerationJob, Notification
+        job_qs = GenerationJob.objects.filter(pk=job_id)
+        job_qs.update(status='FAILED')
+        failed_job = job_qs.select_related('creator').first()
+        if failed_job:
+            from core.notifications import notify
+            notify(failed_job.creator, f'"{failed_job.title}" could not be generated. Please try again.', Notification.Level.ERROR)
     finally:
         connection.close()

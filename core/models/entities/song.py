@@ -1,3 +1,4 @@
+import uuid
 from django.db import models
 from .library import Library
 from ..enum import Genre, VocalStyle, Occasion, Visibility
@@ -13,6 +14,7 @@ class Song(models.Model):
   lyrics = models.TextField(blank=True, null=True)
   audio_location = models.CharField(max_length=500, blank=True, null=True)
   created_at = models.DateTimeField(auto_now_add=True, null=True)
+  share_token = models.UUIDField(default=uuid.uuid4, unique=True)
 
   def __str__(self):
     return self.title
