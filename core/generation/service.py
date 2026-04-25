@@ -66,6 +66,7 @@ class GenerationService:
         if result.task_id:
             job.task_id = result.task_id
             job.save(update_fields=['task_id'])
+            logger.info("Job %s: taskId=%s stored", job.pk, job.task_id)
 
         # ── 3. Poll if async (Suno returns completed=False) ───────────────
         if not result.completed:

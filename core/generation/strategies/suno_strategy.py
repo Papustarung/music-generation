@@ -1,7 +1,11 @@
+import logging
+
 import requests as http_requests
 from django.conf import settings
 
 from .base import SongGeneratorStrategy, GenerationRequest, GenerationResult
+
+logger = logging.getLogger(__name__)
 
 GENERATE_URL = 'https://api.sunoapi.org/api/v1/generate'
 RECORD_URL = 'https://api.sunoapi.org/api/v1/generate/record-info'
@@ -109,6 +113,7 @@ class SunoSongGeneratorStrategy(SongGeneratorStrategy):
                 error=f'No taskId in Suno response: {data}',
             )
 
+        logger.info("Suno generate: taskId=%s received for title='%s'", task_id, request.title)
         return GenerationResult(success=True, completed=False, task_id=task_id)
 
     def poll(self, task_id: str) -> GenerationResult:
@@ -144,6 +149,7 @@ class SunoSongGeneratorStrategy(SongGeneratorStrategy):
         record = data.get('data') or {}
         status = record.get('status', '').upper()
         clips = record.get('clips', {})
+        logger.info("Suno poll: taskId=%s status=%s", task_id, status or '(no status field)')
 
         if status in FAILED_STATUSES:
             return GenerationResult(
@@ -162,7 +168,9 @@ class SunoSongGeneratorStrategy(SongGeneratorStrategy):
             audio_url = first_clip.get('audio_url', '')
             # Audio not ready yet despite complete status — keep polling
             if not audio_url:
+                logger.info("Suno poll: taskId=%s status=%s but audio_url empty, continuing poll", task_id, status)
                 return GenerationResult(success=True, completed=False, task_id=task_id)
+            logger.info("Suno poll: taskId=%s status=%s audio ready", task_id, status)
             return GenerationResult(
                 success=True,
                 completed=True,
