@@ -156,6 +156,11 @@ LOGGING = {
     },
 }
 
+# Token system
+DAILY_TOKEN_GRANT = 10       # tokens granted per day
+TOKEN_MAX_BALANCE = 10       # balance never exceeds this
+TOKEN_COST_PER_GENERATION = 1
+
 # Song generation
 GENERATOR_STRATEGY = config('GENERATOR_STRATEGY', default='mock')
 SUNO_API_KEY = config('SUNO_API_KEY', default='')

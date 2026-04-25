@@ -4,6 +4,12 @@
 <div style="max-width:640px;margin:2rem auto;">
   <h2 style="margin-bottom:1.5rem;">{{ title }}</h2>
 
+  {% if token_error %}
+  <div class="card" style="margin-bottom:1.5rem;border-color:#7f1d1d;">
+    <p style="color:#fca5a5;margin:0;">&#9888; You have no tokens remaining. Your balance replenishes tomorrow.</p>
+  </div>
+  {% endif %}
+
   {% if show_rules %}
   <div class="card" style="margin-bottom:1.5rem;border-color:#7c3aed;">
     <p style="color:#a78bfa;font-weight:600;margin:0 0 .75rem;">&#9888; Content Rules</p>

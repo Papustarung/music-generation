@@ -9,6 +9,7 @@ from ..models import GenerationJob
 from ..models.enum.job_status import JobStatus
 from ..notifications import notify
 from ..models.entities.notification import Notification
+from .. import tokens
 
 logger = logging.getLogger(__name__)
 
@@ -62,6 +63,24 @@ def generation_job_create(request):
     form = GenerateSongForm(request.POST or None)
 
     if request.method == 'POST' and form.is_valid():
+        # Lazy midnight replenishment — grants tokens if date has changed
+        tokens.replenish_if_needed(request.user)
+
+        # FR-13: block and notify if balance is insufficient
+        if not tokens.has_enough(request.user):
+            notify(
+                request.user,
+                'Insufficient tokens. Your daily tokens will replenish tomorrow.',
+                Notification.Level.ERROR,
+            )
+            return render(request, 'generation_job/form.html', {
+                'form': form,
+                'title': 'Generate a Song',
+                'show_rules': True,
+                'rules': CONTENT_RULES,
+                'token_error': True,
+            })
+
         job = GenerationJob.objects.create(
             creator=request.user,
             status=JobStatus.QUEUED,
@@ -73,8 +92,13 @@ def generation_job_create(request):
             lyrics=form.cleaned_data.get('lyrics') or None,
         )
 
-        # FR-14: tokens sufficient — notify and proceed
-        notify(request.user, 'Tokens are sufficient. Your song generation has started.', Notification.Level.INFO)
+        # FR-14: tokens sufficient — deduct and notify
+        tokens.deduct(request.user)
+        notify(
+            request.user,
+            f'1 token used. You have {request.user.token_amount} token(s) remaining today.',
+            Notification.Level.INFO,
+        )
 
         # daemon=False → thread outlives the HTTP request (FR-09)
         thread = threading.Thread(
