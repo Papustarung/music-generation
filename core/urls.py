@@ -8,7 +8,7 @@ from .views.creator_views import (
     creator_list, creator_detail, creator_create, creator_update, creator_delete,
 )
 from .views.song_views import (
-    song_list, song_detail, song_update, song_delete, shared_song,
+    song_list, song_detail, song_update, song_delete, shared_song, song_download,
 )
 from .views.generation_job_views import (
     generation_job_list, generation_job_detail, generation_job_create,
@@ -43,6 +43,7 @@ urlpatterns = [
     path('songs/<int:pk>/', song_detail, name='song_detail'),
     path('songs/<int:pk>/edit/', song_update, name='song_update'),
     path('songs/<int:pk>/delete/', song_delete, name='song_delete'),
+    path('songs/<int:pk>/download/', song_download, name='song_download'),
 
     path('notifications/', notification_list, name='notification_list'),
 

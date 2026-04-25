@@ -106,6 +106,106 @@ Visiting `http://127.0.0.1:8000/` redirects to `/creators/`. A navigation bar li
 
 ---
 
+## Song Generation — Strategy Pattern
+
+Generation is implemented using the **Strategy** design pattern, allowing the AI backend to be swapped without changing the rest of the application.
+
+### Architecture
+
+```
+SongGeneratorStrategy (abstract base — base.py)
+├── MockSongGeneratorStrategy   (mock_strategy.py)   ← no network, instant result
+└── SunoSongGeneratorStrategy   (suno_strategy.py)   ← calls api.sunoapi.org
+
+SongGeneratorFactory (factory.py)  ← reads GENERATOR_STRATEGY from .env
+GenerationService   (service.py)   ← orchestrates the full job lifecycle
+```
+
+| File | Role |
+|---|---|
+| `core/generation/strategies/base.py` | `SongGeneratorStrategy` ABC + `GenerationRequest` / `GenerationResult` dataclasses |
+| `core/generation/strategies/mock_strategy.py` | Returns a static MP3 instantly — no API key required |
+| `core/generation/strategies/suno_strategy.py` | POSTs to Suno API, receives webhook callback, parses clips |
+| `core/generation/factory.py` | Reads `GENERATOR_STRATEGY` env var and returns the right strategy |
+| `core/generation/service.py` | Runs the full QUEUED → GENERATING → SAVING → COMPLETED lifecycle |
+
+---
+
+### Running in Mock Mode
+
+Mock mode requires no API key and completes instantly.
+
+**1. Set environment variable**
+
+In your `.env` file:
+```
+GENERATOR_STRATEGY = mock
+```
+
+**2. Start the server**
+```bash
+python manage.py runserver
+```
+
+**3. Generate a song**
+
+Go to `http://127.0.0.1:8000/jobs/create/`, fill in the form, and submit.  
+The job will complete immediately and the song will appear in your library with a static placeholder audio file.
+
+**Example log output (mock):**
+```
+INFO Suno webhook: callbackType=... (not called in mock mode)
+# Job transitions: QUEUED → GENERATING → SAVING → COMPLETED
+```
+
+---
+
+### Running in Suno Mode
+
+**1. Obtain a Suno API key**
+
+Register at [api.sunoapi.org](https://api.sunoapi.org) and copy your API key.
+
+**2. Configure `.env`**
+
+```
+GENERATOR_STRATEGY = suno
+SUNO_API_KEY = <your-key-here>
+SUNO_CALLBACK_URL = https://<your-ngrok-subdomain>.ngrok-free.app/jobs/webhook/suno/
+```
+
+> **Never commit your `.env` file.** It is excluded by `.gitignore`.  
+> Use `.env.example` as a safe template to share with collaborators.
+
+**3. Expose localhost with ngrok** (required for Suno's callback)
+
+```bash
+ngrok http 8000
+```
+
+Copy the `https://xxxx.ngrok-free.app` URL into `SUNO_CALLBACK_URL` in `.env`.
+
+**4. Start the server**
+```bash
+python manage.py runserver
+```
+
+**5. Generate a song**
+
+Go to `/jobs/create/`, fill in the form, and submit.  
+The job starts asynchronously. Status updates every 5 seconds on the detail page.
+
+**Example log output (Suno):**
+```
+INFO Suno webhook: callbackType=text job=5
+INFO Suno webhook: callbackType=first job=5
+INFO Suno webhook: callbackType=complete job=5
+INFO Suno webhook: job=5 audio_url=https://tempfile.aiquickdraw.com/r/....mp3
+INFO Suno webhook: job 5 completed successfully
+```
+
+---
+
 ## Domain Model
 
 The domain layer consists of the following entities and enumerations:

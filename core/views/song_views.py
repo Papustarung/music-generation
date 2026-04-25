@@ -1,4 +1,9 @@
+import urllib.request
+from pathlib import Path
+
+from django.conf import settings
 from django.contrib.auth.decorators import login_required
+from django.http import FileResponse, HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 
 from ..models import Song
@@ -36,6 +41,33 @@ def song_update(request, pk):
     else:
         form = SongForm(instance=song)
     return render(request, 'song/form.html', {'form': form, 'title': 'Edit Song'})
+
+
+@login_required
+def song_download(request, pk):
+    song = get_object_or_404(Song, pk=pk, library__creator=request.user)
+    if not song.audio_location:
+        return HttpResponse('No audio available for this song.', status=404)
+
+    filename = f"{song.title}.mp3".replace('/', '-')
+
+    # Local media file
+    if song.audio_location.startswith(settings.MEDIA_URL):
+        relative = song.audio_location[len(settings.MEDIA_URL):]
+        file_path = Path(settings.MEDIA_ROOT) / relative
+        if file_path.exists():
+            return FileResponse(file_path.open('rb'), as_attachment=True, filename=filename)
+
+    # Remote URL — proxy the file so the browser gets an attachment download
+    try:
+        req = urllib.request.Request(song.audio_location, headers={'User-Agent': 'Mozilla/5.0'})
+        with urllib.request.urlopen(req, timeout=30) as resp:
+            data = resp.read()
+        response = HttpResponse(data, content_type='audio/mpeg')
+        response['Content-Disposition'] = f'attachment; filename="{filename}"'
+        return response
+    except Exception:
+        return HttpResponse('Could not retrieve audio file.', status=502)
 
 
 def shared_song(request, token):
