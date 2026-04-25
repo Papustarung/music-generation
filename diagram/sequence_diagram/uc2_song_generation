@@ -1,0 +1,69 @@
+sequenceDiagram
+    actor Creator
+    participant generation_job_views
+    participant GenerateSongForm
+    participant GenerationJob
+    participant GenerationService
+    participant SunoSongGeneratorStrategy
+    participant SunoAPI as Suno API
+    participant webhook_views
+    participant Library
+    participant Song
+    participant Notification
+
+    %% ── 1. HTTP Request Phase ──────────────────────────────────────────────
+    Creator->>generation_job_views: POST /jobs/create/
+    generation_job_views->>GenerateSongForm: is_valid()
+    GenerateSongForm-->>generation_job_views: valid
+
+    alt insufficient tokens
+        generation_job_views->>Notification: notify(creator, ERROR: insufficient tokens)
+        generation_job_views-->>Creator: 200 form + token error
+    else sufficient tokens
+        generation_job_views->>GenerationJob: objects.create(creator, status=QUEUED, title, story, ...)
+        GenerationJob-->>generation_job_views: job
+        generation_job_views->>Notification: notify(creator, INFO: 1 token deducted)
+        Note over generation_job_views: Thread(daemon=False).start(_run_generation_thread)
+        generation_job_views-->>Creator: 302 redirect → /jobs/{pk}/
+
+        %% ── 2. Background Thread (FR-09) ───────────────────────────────────
+        Note over generation_job_views,GenerationService: ── background thread (FR-09) ──
+        generation_job_views-)GenerationService: run(job)
+        GenerationService->>GenerationJob: _set_status(GENERATING)
+        GenerationService->>SunoSongGeneratorStrategy: generate(GenerationRequest)
+        SunoSongGeneratorStrategy->>SunoAPI: POST /generate (callback_url=?job={pk})
+        SunoAPI-->>SunoSongGeneratorStrategy: { task_id, completed=False }
+        SunoSongGeneratorStrategy-->>GenerationService: GenerationResult(task_id, completed=False)
+        GenerationService->>GenerationJob: save(task_id)
+
+        loop poll every 5 s (max 10 min)
+            GenerationService->>SunoSongGeneratorStrategy: poll(task_id)
+            SunoSongGeneratorStrategy->>SunoAPI: GET /query?taskId={task_id}
+            SunoAPI-->>SunoSongGeneratorStrategy: status
+            SunoSongGeneratorStrategy-->>GenerationService: GenerationResult
+            GenerationService->>GenerationJob: refresh_from_db()
+            Note over GenerationService: if job.status == COMPLETED → exit (webhook won)
+        end
+    end
+
+    %% ── 3. Suno Webhook Callback (separate HTTP request, fires async) ──────
+    SunoAPI-)webhook_views: POST /jobs/webhook/suno/?job={pk}
+    webhook_views->>webhook_views: parse JSON, verify callbackType ∈ {first, complete}
+    Note over webhook_views: Thread(daemon=False).start(_handle_webhook_completion)
+    webhook_views-->>SunoAPI: 200 OK
+
+    %% ── 4. Webhook Completion Thread ───────────────────────────────────────
+    Note over webhook_views,Notification: ── webhook completion thread ──
+    webhook_views->>GenerationJob: objects.filter(pk).first()
+    GenerationJob-->>webhook_views: job
+    webhook_views->>GenerationJob: save(status=SAVING)
+    webhook_views->>GenerationService: _save_song(job, result)
+    GenerationService->>SunoAPI: _download_audio(audio_url)
+    SunoAPI-->>GenerationService: mp3 bytes → /media/songs/{uuid}.mp3
+    GenerationService->>Library: job.creator.library
+    Library-->>GenerationService: library
+    GenerationService->>Song: objects.create(library, title, audio_location, ...)
+    Song-->>GenerationService: song
+    GenerationService-->>webhook_views: done
+    webhook_views->>GenerationJob: save(status=COMPLETED, song=song)
+    webhook_views->>Notification: notify(creator, SUCCESS: song saved to library)

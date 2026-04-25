@@ -334,3 +334,18 @@ The application follows Django's **MVT (Model–View–Template)** architecture,
 - **Strategy** — `AuthService` / `GenerationService` each depend on an abstract strategy interface. Concrete strategies (`PasswordAuthStrategy`, `GoogleAuthStrategy`, `MockSongGeneratorStrategy`, `SunoSongGeneratorStrategy`) are selected at runtime via a Factory.
 - **Factory** — `AuthStrategyFactory` and `SongGeneratorFactory` read environment variables to instantiate the correct strategy.
 - **Observer (Signal)** — A Django `post_save` signal on `Creator` automatically creates the associated `Library`.
+
+---
+
+## Sequence Diagram — UC-2: Generate a Song
+
+> **Note — diagram density:** The Mermaid source (`diagram/sequence_diagram/uc2_song_generation`) spans 11 participants and 4 phases across two concurrent threads. When rendered in an online editor this produces a wide, heavily annotated diagram that forces all text to a very small size. The exported PNG (`diagram/sequence_diagram/uc2_song_generation.png`) and PDF are the recommended way to read the diagram at full resolution.
+
+![UC-2 Song Generation Sequence](diagram/sequence_diagram/uc2_song_generation.png)
+
+The diagram covers the full song generation lifecycle across four phases:
+
+1. **HTTP request** — Creator submits the generation form; `generation_job_views` validates input, checks token balance, creates the `GenerationJob` (status `QUEUED`), deducts a token, spawns a background thread, and immediately returns a redirect — the browser never waits for generation to finish (FR-09).
+2. **Background thread** — `GenerationService` drives the job through `GENERATING`; `SunoSongGeneratorStrategy` calls the Suno API and polls for completion every 5 seconds (up to 10 minutes), exiting early if the webhook wins the race.
+3. **Suno webhook callback** — Suno fires a `POST` to `webhook_views`; the view spawns its own completion thread and returns `200 OK` immediately.
+4. **Webhook completion thread** — status set to `SAVING`; `GenerationService._save_song()` downloads the audio to local disk, creates the `Song` record linked to the creator's `Library`, sets status to `COMPLETED`, and sends a success `Notification`.
