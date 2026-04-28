@@ -183,7 +183,7 @@ SUNO_CALLBACK_URL = https://<your-ngrok-subdomain>.ngrok-free.app/jobs/webhook/s
 ngrok http 8000
 ```
 
-Copy the `https://xxxx.ngrok-free.app` URL into `SUNO_CALLBACK_URL` in `.env`.
+Copy the ngrok forwarding URL and append `/jobs/webhook/suno/`, e.g. `https://xxxx.ngrok-free.app/jobs/webhook/suno/`, into `SUNO_CALLBACK_URL` in `.env`.
 
 **4. Start the server**
 ```bash
